@@ -1774,3 +1774,326 @@ body:not(.v-chat) [data-view="chat"] {
 .rep .btn {
   padding: 6px 12px;
 }
+
+/* ==========================================================================
+   Admin Dashboard & Management Styles
+   ========================================================================== */
+
+.admin-nav-link {
+  font-weight: 700;
+  color: var(--blue) !important;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.admin-nav-link:hover {
+  border-bottom-color: var(--accent);
+}
+
+.adtitle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adstatus-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+}
+.adstatus-pill.online {
+  background: rgba(34, 197, 94, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+.adstatus-pill.offline {
+  background: rgba(234, 179, 8, 0.25);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.adhead-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn.small {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.adsearch-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 280px;
+  max-width: 520px;
+}
+.adsearch-filter-wrap input {
+  flex: 1;
+}
+
+.adfilter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  outline: none;
+}
+.adfilter-select:focus {
+  border-color: var(--blue);
+}
+
+.adexport-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* Status Badges */
+.adbadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+.adbadge-booked {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.adbadge-picked {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.adbadge-returned {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.adbadge-cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.adbadge-available {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.adbadge-rented {
+  background: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+.adbadge-maintenance {
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+/* Status Selector in Table */
+.status-sel {
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+  cursor: pointer;
+}
+.status-sel:focus {
+  border-color: var(--blue);
+}
+
+.table-actions {
+  display: flex;
+  gap: 6px;
+}
+.table-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.err-btn {
+  color: #dc2626 !important;
+  border-color: #fca5a5 !important;
+}
+.err-btn:hover {
+  background: #fee2e2 !important;
+}
+
+/* Fleet Cards Grid in Admin */
+.adfleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+.adcar-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.adcar-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.adcar-thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+.adcar-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.adcar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.adcar-top h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+.adcar-specs {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.adcar-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue);
+  margin-top: auto;
+}
+.adcar-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  gap: 8px;
+}
+
+/* Admin Modals */
+.admodal-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.admodal {
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+.admodal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--hdr);
+  color: #fff;
+  border-radius: 16px 16px 0 0;
+}
+.admodal-head h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.admodal-head .x {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.admodal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.admodal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--tint);
+  border-radius: 0 0 16px 16px;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Booking Detail Grid */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.detail-item {
+  background: var(--tint);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.detail-item.full {
+  grid-column: span 2;
+}
+.detail-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 2px;
+}
+.detail-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}

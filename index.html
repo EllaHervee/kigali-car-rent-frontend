@@ -173,7 +173,8 @@
           <a href="#top">Home</a><a href="#fleet">Bookings</a
           ><a href="#pay-now">Payment</a
           ><a href="#chat" id="chatlink" hidden>Chat</a
-          ><a href="#contact">Contact</a>
+          ><a href="#contact">Contact</a
+          ><a href="#admin" id="adminnav" class="admin-nav-link">Admin</a>
         </nav>
       </div>
     </header>
@@ -222,8 +223,8 @@
       <section class="wrap paynow" id="pay-now" data-view="payment">
         <h2>Pay with mobile money</h2>
         <p>
-          Choose MTN or Airtel, enter your number and the amount, and we send a
-          code to your phone.
+          Choose MTN or Airtel, enter your number and amount, then approve the
+          payment request in the official prompt on your phone.
         </p>
         <div class="paybtns">
           <button class="paylink big" data-pay="MTN Mobile Money">
@@ -510,8 +511,9 @@
         </div>
         <div id="p1" class="pstep">
           <p class="hint">
-            Enter the amount you want to pay and your mobile money number. We
-            will send a payment code to that phone.
+            Enter your amount and mobile-money number. We will request payment
+            from the provider. Approve it on your phone using the official
+            MTN/Airtel prompt. This website will never ask for your MoMo PIN.
           </p>
           <label
             >Amount (RWF)<input
@@ -537,7 +539,7 @@
           <label>Full name<input id="pnm" autocomplete="name" /></label>
           <p class="err" id="e1" role="alert"></p>
           <button class="btn" id="sendcode" type="button">
-            Send payment code
+            Request payment on phone
           </button>
           <button class="link" id="back1" type="button">
             ← Back to booking
@@ -545,24 +547,16 @@
         </div>
         <div id="p2" class="pstep" hidden>
           <p class="hint" id="sent"></p>
-          <label
-            >Payment code<input
-              id="code"
-              inputmode="numeric"
-              maxlength="6"
-              placeholder="Enter code"
-              autocomplete="one-time-code"
-          /></label>
           <p class="err" id="e2" role="alert"></p>
           <button class="btn" id="confirm" type="button">
-            Confirm payment
+            Check payment status
           </button>
           <button class="link" id="resend" type="button">
-            Send the code again
+            Check again
           </button>
         </div>
         <div id="p3" class="pstep done" hidden>
-          <h3>Payment received</h3>
+          <h3 id="pay-result-title">Payment confirmed</h3>
           <p class="hint" id="rcpt"></p>
           <a class="btn" id="wasend" target="_blank" rel="noopener"
             >Send details on WhatsApp</a
@@ -628,46 +622,180 @@
     </div>
     <div class="admin" id="admin" hidden>
       <div class="adhead">
-        <h2>Admin dashboard</h2>
-        <div>
-          <button class="btn" id="adout" type="button">Log out</button
-          ><button class="x" id="adclose" aria-label="Close dashboard">
-            ✕
-          </button>
+        <div class="adtitle-group">
+          <h2>Admin Dashboard</h2>
+          <span class="adstatus-pill" id="adstatus-pill">🟢 Server Connected</span>
+        </div>
+        <div class="adhead-actions">
+          <button class="btn ghost small" id="adrefresh" type="button" title="Refresh all data">↻ Refresh</button>
+          <button class="btn small" id="adnewbkbtn" type="button">+ New Booking</button>
+          <button class="btn ghost small" id="adnewcarbtn" type="button">+ Add Car</button>
+          <button class="btn ghost small" id="adout" type="button">Log out</button>
+          <button class="x" id="adclose" aria-label="Close dashboard">✕</button>
         </div>
       </div>
       <div class="stats" id="stats"></div>
       <div id="alerts"></div>
       <div class="adtools">
         <div class="tabs">
-          <button class="atab" data-at="bookings" aria-pressed="true">
-            Bookings</button
-          ><button class="atab" data-at="payments" aria-pressed="false">
-            Payments</button
-          ><button class="atab" data-at="customers" aria-pressed="false">
-            Customers</button
-          ><button class="atab" data-at="chats" aria-pressed="false">
-            Chats
-          </button
-          ><button class="atab" data-at="activity" aria-pressed="false">
-            Activity
-          </button>
+          <button class="atab" data-at="bookings" aria-pressed="true">Bookings</button>
+          <button class="atab" data-at="fleet" aria-pressed="false">Fleet / Cars</button>
+          <button class="atab" data-at="payments" aria-pressed="false">Payments</button>
+          <button class="atab" data-at="customers" aria-pressed="false">Customers</button>
+          <button class="atab" data-at="chats" aria-pressed="false">Chats &amp; Inquiries</button>
+          <button class="atab" data-at="activity" aria-pressed="false">Activity</button>
         </div>
-        <input
-          id="adq"
-          type="search"
-          placeholder="Search name, phone, car or reference"
-        />
-        <button class="btn" id="exportdata" type="button">
-          Download accounts &amp; login logs
-        </button>
+        <div class="adsearch-filter-wrap">
+          <input
+            id="adq"
+            type="search"
+            placeholder="Search name, phone, car, ref..."
+            aria-label="Search admin data"
+          />
+          <select id="adfilter" class="adfilter-select" aria-label="Filter status">
+            <option value="all">All statuses</option>
+            <option value="Booked">Booked</option>
+            <option value="Picked up">Picked up</option>
+            <option value="Returned">Returned</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="adexport-group">
+          <button class="btn ghost small" id="exportcsv" type="button">Export CSV</button>
+          <button class="btn ghost small" id="exportdata" type="button">Download JSON</button>
+        </div>
       </div>
       <div class="tablewrap" id="adtable"></div>
-      <p class="hint">
-        Customer accounts and login activity are saved on the server. Bookings,
-        payments and chats still remain in this browser. Exports never include
-        passwords or password hashes.
+      <p class="hint" id="adhint">
+        Data is synchronized with Kigali Car Rent server. Sensitive passwords and hashes are never exposed.
       </p>
+    </div>
+
+    <!-- Admin Walk-in Booking Modal -->
+    <div class="admodal-scrim" id="admodal-scrim" hidden>
+      <div class="admodal" id="admodal-bk" hidden>
+        <div class="admodal-head">
+          <h3>Create Walk-in Booking</h3>
+          <button class="x" id="admodal-bk-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="admodal-body">
+          <div class="two">
+            <label>Customer Name<input id="wbk-name" placeholder="Full name" required /></label>
+            <label>Phone Number<input id="wbk-phone" placeholder="0783 553 434" required /></label>
+          </div>
+          <div class="two">
+            <label>Vehicle
+              <select id="wbk-car" class="adfilter-select"></select>
+            </label>
+            <label>Pickup Location
+              <input id="wbk-loc" placeholder="Kigali Airport or City" value="Kigali Airport" />
+            </label>
+          </div>
+          <div class="two">
+            <label>Pickup Date<input id="wbk-d1" type="date" required /></label>
+            <label>Return Date<input id="wbk-d2" type="date" required /></label>
+          </div>
+          <div class="two">
+            <label>National ID / Passport<input id="wbk-nid" placeholder="ID or Passport number" /></label>
+            <label class="check-label">
+              <input id="wbk-drv" type="checkbox" /> Include professional driver (+30,000 RWF/day)
+            </label>
+          </div>
+          <div class="two">
+            <label>Total Price (RWF)<input id="wbk-total" type="number" min="0" /></label>
+            <label>Amount Paid (RWF)<input id="wbk-paid" type="number" min="0" value="0" /></label>
+          </div>
+          <p class="err" id="wbk-err" role="alert"></p>
+        </div>
+        <div class="admodal-foot">
+          <button class="btn ghost" id="wbk-cancel" type="button">Cancel</button>
+          <button class="btn" id="wbk-submit" type="button">Save Booking</button>
+        </div>
+      </div>
+
+      <!-- Admin Add / Edit Car Modal -->
+      <div class="admodal" id="admodal-car" hidden>
+        <div class="admodal-head">
+          <h3 id="admodal-car-title">Add / Edit Fleet Car</h3>
+          <button class="x" id="admodal-car-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="admodal-body">
+          <input type="hidden" id="wcar-id" />
+          <div class="two">
+            <label>Car Model Name<input id="wcar-name" placeholder="e.g. Toyota Prado TXL" required /></label>
+            <label>Category
+              <select id="wcar-cat" class="adfilter-select">
+                <option value="economy">Economy</option>
+                <option value="suv" selected>SUV</option>
+                <option value="premium">Premium</option>
+                <option value="van">Van</option>
+                <option value="safari">Safari</option>
+              </select>
+            </label>
+          </div>
+          <div class="two">
+            <label>Daily Rate (RWF)<input id="wcar-price" type="number" min="10000" step="5000" placeholder="e.g. 90000" required /></label>
+            <label>Transmission
+              <select id="wcar-tr" class="adfilter-select">
+                <option value="Automatic" selected>Automatic</option>
+                <option value="Manual">Manual</option>
+              </select>
+            </label>
+          </div>
+          <div class="two">
+            <label>Seats<input id="wcar-seats" type="number" min="2" max="30" value="5" /></label>
+            <label>Fuel Type
+              <select id="wcar-fuel" class="adfilter-select">
+                <option value="Petrol" selected>Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </label>
+          </div>
+          <div class="two">
+            <label>Initial Status
+              <select id="wcar-status" class="adfilter-select">
+                <option value="Available" selected>Available</option>
+                <option value="Rented">Rented</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+            </label>
+            <label>Image Preset
+              <select id="wcar-img" class="adfilter-select">
+                <option value="images/car-1.jpg">car-1 (Toyota Land Cruiser V8)</option>
+                <option value="images/car-2.jpg">car-2 (Toyota RAV4 Hybrid)</option>
+                <option value="images/car-3.jpg">car-3 (Kia Sorento)</option>
+                <option value="images/car-4.jpg">car-4 (Range Rover Vogue)</option>
+                <option value="images/car-5.jpg">car-5 (Toyota Fortuner)</option>
+                <option value="images/car-6.jpg">car-6 (Mercedes G63 AMG)</option>
+                <option value="images/car-7.jpg">car-7 (Hyundai Tucson)</option>
+                <option value="images/car-8.jpg">car-8 (Land Cruiser Safari 4x4)</option>
+                <option value="images/car-9.jpg">car-9 (Toyota Hilux Double Cab)</option>
+                <option value="images/car-10.jpg">car-10 (Toyota Coaster Bus)</option>
+                <option value="images/car-11.jpg">car-11 (Toyota HiAce Super Custom)</option>
+                <option value="images/car-12.jpg">car-12 (Toyota Yaris)</option>
+              </select>
+            </label>
+          </div>
+          <p class="err" id="wcar-err" role="alert"></p>
+        </div>
+        <div class="admodal-foot">
+          <button class="btn ghost" id="wcar-cancel" type="button">Cancel</button>
+          <button class="btn" id="wcar-submit" type="button">Save Car</button>
+        </div>
+      </div>
+
+      <!-- Booking Details Modal -->
+      <div class="admodal" id="admodal-view" hidden>
+        <div class="admodal-head">
+          <h3>Booking Details</h3>
+          <button class="x" id="admodal-view-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <div class="admodal-body" id="admodal-view-body"></div>
+        <div class="admodal-foot">
+          <button class="btn ghost" id="admodal-view-ok" type="button">Close</button>
+        </div>
+      </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
 
