@@ -1,177 +1,676 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kigali Car Rent – Rent a car in Rwanda</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body class="v-home">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="phone" viewBox="0 0 24 24"><path fill="currentColor" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></symbol><symbol id="mtn" viewBox="0 0 64 36"><ellipse cx="32" cy="18" rx="31" ry="17" fill="#FFCC00" stroke="#111" stroke-width="1.5"/><text x="32" y="24" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="17" fill="#111">MTN</text></symbol><symbol id="airtel" viewBox="0 0 64 36"><rect width="64" height="36" rx="8" fill="#E40000"/><text x="32" y="24" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="15" fill="#fff">airtel</text></symbol><symbol id="chaticon" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></symbol><symbol id="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></symbol><symbol id="bellicon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></symbol><symbol id="searchicon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol><symbol id="menuicon" viewBox="0 0 24 24"><path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></symbol><symbol id="mailicon" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></symbol><symbol id="globeicon" viewBox="0 0 24 24"><path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 0 1 5.08 16zm2.95-8H5.08a7.987 7.987 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.1-.66-.16-1.32-.16-2 0-.68.06-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></symbol></svg>
-<header class="top">
- <div class="wrap bar">
-  <div class="logo"><img src="images/logo.jpg" alt="Kigali Car Rent" height="64"></div>
-  <div class="searchbar" role="search"><input id="q" type="search" placeholder="Search cars, e.g. RAV4, SUV, Safari" aria-label="Search cars" autocomplete="off"><button id="qgo" type="button" aria-label="Search"><svg class="ph" aria-hidden="true"><use href="#searchicon"/></svg></button></div>
-  <div class="right">
-   <div class="lang"><button id="langbtn" type="button" aria-label="Language" aria-expanded="false"><svg class="ph" aria-hidden="true"><use href="#globeicon"/></svg><span id="langlabel">English-RWF</span></button><div class="langmenu" id="langmenu" hidden><button data-lang="en">English</button><button data-lang="fr">Français</button><button data-lang="rw">Kinyarwanda</button></div></div>
-   <a class="call" href="tel:+250783553434" aria-label="Call 0783 553 434"><svg class="ph" aria-hidden="true"><use href="#phone"/></svg>0783 553 434</a><span class="bellwrap"><button class="bell" id="bell" type="button" aria-label="Notifications" aria-expanded="false"><svg class="ph" aria-hidden="true"><use href="#bellicon"/></svg><span class="dot" id="dot" hidden>0</span></button><div class="notes" id="notes" hidden></div></span><span id="auth"></span>
-  </div>
- </div>
- <div class="wrap bar2">
-  <div class="catwrap"><button id="catbtn" type="button" aria-expanded="false"><svg class="ph" aria-hidden="true"><use href="#menuicon"/></svg>All categories</button><div class="catmenu" id="catmenu" hidden><button data-cat="all">All cars</button><button data-cat="economy">Economy</button><button data-cat="suv">SUV</button><button data-cat="premium">Premium</button><button data-cat="van">Van</button><button data-cat="safari">Safari</button></div></div>
-  <nav><a href="#top">Home</a><a href="#fleet">Bookings</a><a href="#pay-now">Payment</a><a href="#chat" id="chatlink" hidden>Chat</a><a href="#contact">Contact</a></nav>
- </div>
-</header>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Kigali Car Rent – Rent a car in Rwanda</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="v-home">
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="phone" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"
+        />
+      </symbol>
+      <symbol id="mtn" viewBox="0 0 64 36">
+        <ellipse
+          cx="32"
+          cy="18"
+          rx="31"
+          ry="17"
+          fill="#FFCC00"
+          stroke="#111"
+          stroke-width="1.5"
+        />
+        <text
+          x="32"
+          y="24"
+          text-anchor="middle"
+          font-family="Arial Black,Arial,sans-serif"
+          font-weight="900"
+          font-size="17"
+          fill="#111"
+        >
+          MTN
+        </text>
+      </symbol>
+      <symbol id="airtel" viewBox="0 0 64 36">
+        <rect width="64" height="36" rx="8" fill="#E40000" />
+        <text
+          x="32"
+          y="24"
+          text-anchor="middle"
+          font-family="Arial,sans-serif"
+          font-weight="700"
+          font-size="15"
+          fill="#fff"
+        >
+          airtel
+        </text>
+      </symbol>
+      <symbol id="chaticon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"
+        />
+      </symbol>
+      <symbol id="pin" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+        />
+      </symbol>
+      <symbol id="bellicon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+        />
+      </symbol>
+      <symbol id="searchicon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+        />
+      </symbol>
+      <symbol id="menuicon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+        />
+      </symbol>
+      <symbol id="mailicon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+        />
+      </symbol>
+      <symbol id="globeicon" viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 0 1 5.08 16zm2.95-8H5.08a7.987 7.987 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.1-.66-.16-1.32-.16-2 0-.68.06-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"
+        />
+      </symbol>
+    </svg>
+    <header class="top">
+      <div class="wrap bar">
+        <div class="logo">
+          <img src="images/logo.jpg" alt="Kigali Car Rent" height="64" />
+        </div>
+        <div class="searchbar" role="search">
+          <input
+            id="q"
+            type="search"
+            placeholder="Search cars, e.g. RAV4, SUV, Safari"
+            aria-label="Search cars"
+            autocomplete="off"
+          /><button id="qgo" type="button" aria-label="Search">
+            <svg class="ph" aria-hidden="true"><use href="#searchicon" /></svg>
+          </button>
+        </div>
+        <div class="right">
+          <div class="lang">
+            <button
+              id="langbtn"
+              type="button"
+              aria-label="Language"
+              aria-expanded="false"
+            >
+              <svg class="ph" aria-hidden="true"><use href="#globeicon" /></svg
+              ><span id="langlabel">English-RWF</span>
+            </button>
+            <div class="langmenu" id="langmenu" hidden>
+              <button data-lang="en">English</button
+              ><button data-lang="fr">Français</button
+              ><button data-lang="rw">Kinyarwanda</button>
+            </div>
+          </div>
+          <a
+            class="call"
+            href="tel:+250783553434"
+            aria-label="Call 0783 553 434"
+            ><svg class="ph" aria-hidden="true"><use href="#phone" /></svg>0783
+            553 434</a
+          ><span class="bellwrap"
+            ><button
+              class="bell"
+              id="bell"
+              type="button"
+              aria-label="Notifications"
+              aria-expanded="false"
+            >
+              <svg class="ph" aria-hidden="true"><use href="#bellicon" /></svg
+              ><span class="dot" id="dot" hidden>0</span>
+            </button>
+            <div class="notes" id="notes" hidden></div></span
+          ><span id="auth"></span>
+        </div>
+      </div>
+      <div class="wrap bar2">
+        <div class="catwrap">
+          <button id="catbtn" type="button" aria-expanded="false">
+            <svg class="ph" aria-hidden="true"><use href="#menuicon" /></svg>All
+            categories
+          </button>
+          <div class="catmenu" id="catmenu" hidden>
+            <button data-cat="all">All cars</button
+            ><button data-cat="economy">Economy</button
+            ><button data-cat="suv">SUV</button
+            ><button data-cat="premium">Premium</button
+            ><button data-cat="van">Van</button
+            ><button data-cat="safari">Safari</button>
+          </div>
+        </div>
+        <nav>
+          <a href="#top">Home</a><a href="#fleet">Bookings</a
+          ><a href="#pay-now">Payment</a
+          ><a href="#chat" id="chatlink" hidden>Chat</a
+          ><a href="#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
 
-<main id="top">
-<div class="band" data-view="home"><div class="bgslides" id="bgs" aria-hidden="true"></div><section class="wrap hero">
-  <div>
-    <h1>Rent a car in Kigali. Drive all of Rwanda.</h1>
-    <p>Clean, serviced cars with or without a driver. Pick up at Kigali airport or in the city, and return where it suits you.</p>
-    <a class="btn" href="#fleet">Book a car</a>
-  </div>
-  <div id="scene"></div>
-</section></div>
-<section class="wrap fleet" id="fleet" data-view="home">
-  <div class="head"><div><h2>Our cars</h2><small id="range"></small></div>
-    <div class="tabs" role="group" aria-label="Filter cars">
-      <button class="tab" data-f="all" aria-pressed="true">All</button>
-      <button class="tab" data-f="economy" aria-pressed="false">Economy</button>
-      <button class="tab" data-f="suv" aria-pressed="false">SUV</button>
-      <button class="tab" data-f="premium" aria-pressed="false">Premium</button><button class="tab" data-f="van" aria-pressed="false">Van</button><button class="tab" data-f="safari" aria-pressed="false">Safari</button>
+    <main id="top">
+      <div class="band" data-view="home">
+        <div class="bgslides" id="bgs" aria-hidden="true"></div>
+        <section class="wrap hero">
+          <div>
+            <h1>Rent a car in Kigali. Drive all of Rwanda.</h1>
+            <p>
+              Clean, serviced cars with or without a driver. Pick up at Kigali
+              airport or in the city, and return where it suits you.
+            </p>
+            <a class="btn" href="#fleet">Book a car</a>
+          </div>
+          <div id="scene"></div>
+        </section>
+      </div>
+      <section class="wrap fleet" id="fleet" data-view="home">
+        <div class="head">
+          <div>
+            <h2>Our cars</h2>
+            <small id="range"></small>
+          </div>
+          <div class="tabs" role="group" aria-label="Filter cars">
+            <button class="tab" data-f="all" aria-pressed="true">All</button>
+            <button class="tab" data-f="economy" aria-pressed="false">
+              Economy
+            </button>
+            <button class="tab" data-f="suv" aria-pressed="false">SUV</button>
+            <button class="tab" data-f="premium" aria-pressed="false">
+              Premium</button
+            ><button class="tab" data-f="van" aria-pressed="false">Van</button
+            ><button class="tab" data-f="safari" aria-pressed="false">
+              Safari
+            </button>
+          </div>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="more">
+          <button class="btn ghost" id="more" type="button">View more</button>
+        </div>
+      </section>
+
+      <section class="wrap paynow" id="pay-now" data-view="payment">
+        <h2>Pay with mobile money</h2>
+        <p>
+          Choose MTN or Airtel, enter your number and the amount, and we send a
+          code to your phone.
+        </p>
+        <div class="paybtns">
+          <button class="paylink big" data-pay="MTN Mobile Money">
+            <span class="pl lg-mtn" role="img" aria-label="MTN logo"></span>MTN
+            Mobile Money
+          </button>
+          <button class="paylink big" data-pay="Airtel Money">
+            <span
+              class="pl lg-airtel"
+              role="img"
+              aria-label="Airtel logo"
+            ></span
+            >Airtel Money
+          </button>
+        </div>
+      </section>
+
+      <section class="wrap steps" id="how" data-view="payment">
+        <h2 style="font-size: clamp(28px, 4vw, 40px)">Book in three steps</h2>
+        <ol>
+          <li>
+            <h3>Choose your car</h3>
+            <p>Pick the dates and a car that fits your trip and your group.</p>
+          </li>
+          <li>
+            <h3>Send your request</h3>
+            <p>
+              Add your name and phone number. We confirm by call or WhatsApp
+              within an hour.
+            </p>
+          </li>
+          <li>
+            <h3>Pick up and go</h3>
+            <p>
+              Show your driving licence, check the car with us and drive off.
+            </p>
+          </li>
+        </ol>
+      </section>
+      <section class="wrap account" id="account" data-view="account">
+        <h2 id="acname">My account</h2>
+        <p class="hint" id="acphone"></p>
+        <div class="stats" id="acstats"></div>
+        <h3 class="sub">My bookings</h3>
+        <div id="aclist"></div>
+        <h3 class="sub">My payments</h3>
+        <div class="tablewrap" id="acpay"></div>
+      </section>
+
+      <section class="wrap chat" id="chat" data-view="chat">
+        <h2>Chat with us</h2>
+        <p class="hint" id="chatwho"></p>
+        <div class="chatbox">
+          <div class="msgs" id="msgs" aria-live="polite"></div>
+          <div class="chips">
+            <button
+              class="chip"
+              type="button"
+              data-q="How much is a car per day?"
+            >
+              Prices</button
+            ><button class="chip" type="button" data-q="How do I book a car?">
+              How to book</button
+            ><button class="chip" type="button" data-q="How can I pay?">
+              Payment</button
+            ><button
+              class="chip"
+              type="button"
+              data-q="Can I cancel my booking?"
+            >
+              Cancellation
+            </button>
+          </div>
+          <div class="compose">
+            <input
+              id="cin"
+              placeholder="Type your message"
+              autocomplete="off"
+            /><button class="btn" id="chsend" type="button">Send</button>
+          </div>
+        </div>
+        <p class="hint" style="margin-top: 12px">
+          Need an answer now?
+          <a href="https://wa.me/250783553434" target="_blank" rel="noopener"
+            >Continue on WhatsApp</a
+          >
+          or call 0783 553 434.
+        </p>
+      </section>
+
+      <section class="wrap contact" id="contact" data-view="contact">
+        <h2>Contact us</h2>
+        <div class="cgrid">
+          <div class="cinfo">
+            <a class="cbtn" href="tel:+250783553434"
+              ><svg class="ic" aria-hidden="true"><use href="#phone" /></svg
+              ><span><small>Call us</small><b>0783 553 434</b></span></a
+            >
+            <a
+              class="cbtn"
+              href="https://wa.me/250783553434"
+              target="_blank"
+              rel="noopener"
+              ><img
+                class="ic"
+                src="images/whatsapp.jpg"
+                alt="WhatsApp logo"
+                width="42"
+                height="42"
+              /><span><small>WhatsApp</small><b>0783 553 434</b></span></a
+            >
+            <a class="cbtn" href="mailto:iradukundaellaherve@gmail.com"
+              ><svg class="ic" aria-hidden="true"><use href="#mailicon" /></svg
+              ><span
+                ><small>Email</small><b>iradukundaellaherve@gmail.com</b></span
+              ></a
+            >
+            <div class="cbtn">
+              <svg class="ic" aria-hidden="true"><use href="#pin" /></svg
+              ><span><small>Location</small><b>Kigali, Rwanda</b></span>
+            </div>
+          </div>
+          <div class="cform">
+            <label>Your name<input id="cn" autocomplete="name" /></label>
+            <label
+              >Message<textarea
+                id="cm"
+                rows="4"
+                placeholder="Tell us which car and which dates you need"
+              ></textarea>
+            </label>
+            <button class="btn" id="csend" type="button">
+              Send on WhatsApp
+            </button>
+            <button class="btn ghost" id="cmail" type="button">
+              Send by email
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="wrap perks" data-view="payment">
+        <span><b>Free cancellation</b> up to 24 hours before</span
+        ><span><b>Insurance</b> included</span
+        ><span
+          ><b>Pay</b> with
+          <button class="paylink" data-pay="MTN Mobile Money">
+            <span class="pl lg-mtn" role="img" aria-label="MTN logo"></span>MTN
+            Mobile Money
+          </button>
+          or
+          <button class="paylink" data-pay="Airtel Money">
+            <span
+              class="pl lg-airtel"
+              role="img"
+              aria-label="Airtel logo"
+            ></span
+            >Airtel Money
+          </button></span
+        >
+      </div>
+    </main>
+    <footer>
+      <div class="wrap fgrid">
+        <div class="fcol">
+          <h3>Location</h3>
+          <a
+            class="floc"
+            href="https://www.google.com/maps/search/?api=1&amp;query=Kigali%2C%20Rwanda"
+            target="_blank"
+            rel="noopener"
+            ><svg class="ph" aria-hidden="true"><use href="#pin" /></svg>Kigali,
+            Rwanda</a
+          >
+          <a class="floc" id="adlink" href="#owner">Owner admin</a>
+        </div>
+        <div class="fcol">
+          <h3>Follow us</h3>
+          <div class="social">
+            <a
+              href="https://www.facebook.com/"
+              target="_blank"
+              rel="noopener"
+              aria-label="Facebook"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"
+                /></svg
+            ></a>
+            <a
+              href="https://www.instagram.com/"
+              target="_blank"
+              rel="noopener"
+              aria-label="Instagram"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect
+                  x="3"
+                  y="3"
+                  width="18"
+                  height="18"
+                  rx="5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle cx="17.5" cy="6.5" r="1.3" fill="currentColor" /></svg
+            ></a>
+            <a
+              href="https://x.com/"
+              target="_blank"
+              rel="noopener"
+              aria-label="X"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                /></svg
+            ></a>
+          </div>
+        </div>
+      </div>
+      <div class="wrap fcopy">© 2026 Kigali Car Rent</div>
+    </footer>
+
+    <div class="scrim" id="scrim"></div>
+    <aside id="book" aria-label="Booking" aria-hidden="true">
+      <div class="dh">
+        <h2 id="bname">Book</h2>
+        <button class="x" id="close" aria-label="Close booking">✕</button>
+      </div>
+      <label>Pick-up place<select id="bloc" data-k="loc"></select></label>
+      <div class="two">
+        <label>Pick-up date<input type="date" id="bd1" data-k="d1" /></label
+        ><label>Return date<input type="date" id="bd2" data-k="d2" /></label>
+      </div>
+      <label class="chk"
+        ><input type="checkbox" id="drv" /> Add a driver (+ RWF 30,000 per
+        day)</label
+      >
+      <div class="two">
+        <label>Full name<input id="nm" autocomplete="name" /></label
+        ><label>Phone<input id="ph" type="tel" autocomplete="tel" /></label>
+      </div>
+      <fieldset class="pay">
+        <legend>Pay with</legend>
+        <label class="opt"
+          ><input
+            type="radio"
+            name="pm"
+            value="MTN Mobile Money"
+            checked /><span>MTN Mobile Money</span
+          ><span
+            class="pl lg-mtn"
+            role="img"
+            aria-label="MTN logo"
+          ></span></label
+        ><label class="opt"
+          ><input type="radio" name="pm" value="Airtel Money" /><span
+            >Airtel Money</span
+          ><span class="pl lg-airtel" role="img" aria-label="Airtel logo"></span
+        ></label>
+      </fieldset>
+      <div class="sum"><span id="line1"></span><span id="line2"></span></div>
+      <div class="total"><span>Total</span><span id="total"></span></div>
+      <button class="btn" id="send" disabled>Continue to payment</button>
+      <div id="pay" hidden>
+        <div class="paytop">
+          <span
+            id="pmlogo"
+            class="pl lg-mtn"
+            role="img"
+            aria-label="Payment method logo"
+          ></span
+          ><span id="pmname"></span>
+        </div>
+        <div id="p1" class="pstep">
+          <p class="hint">
+            Enter the amount you want to pay and your mobile money number. We
+            will send a payment code to that phone.
+          </p>
+          <label
+            >Amount (RWF)<input
+              id="amt"
+              type="number"
+              inputmode="numeric"
+              min="1"
+          /></label>
+          <div class="quick">
+            <button type="button" class="chip" id="full">Pay full amount</button
+            ><button type="button" class="chip" id="dep">
+              Pay 30% deposit
+            </button>
+          </div>
+          <label
+            >Mobile money number<input
+              id="mm"
+              type="tel"
+              inputmode="tel"
+              placeholder="07XX XXX XXX"
+          /></label>
+          <p class="hint" id="netnote"></p>
+          <label>Full name<input id="pnm" autocomplete="name" /></label>
+          <p class="err" id="e1" role="alert"></p>
+          <button class="btn" id="sendcode" type="button">
+            Send payment code
+          </button>
+          <button class="link" id="back1" type="button">
+            ← Back to booking
+          </button>
+        </div>
+        <div id="p2" class="pstep" hidden>
+          <p class="hint" id="sent"></p>
+          <label
+            >Payment code<input
+              id="code"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="Enter code"
+              autocomplete="one-time-code"
+          /></label>
+          <p class="err" id="e2" role="alert"></p>
+          <button class="btn" id="confirm" type="button">
+            Confirm payment
+          </button>
+          <button class="link" id="resend" type="button">
+            Send the code again
+          </button>
+        </div>
+        <div id="p3" class="pstep done" hidden>
+          <h3>Payment received</h3>
+          <p class="hint" id="rcpt"></p>
+          <a class="btn" id="wasend" target="_blank" rel="noopener"
+            >Send details on WhatsApp</a
+          >
+          <button class="link" id="finish" type="button">Done</button>
+        </div>
+      </div>
+    </aside>
+    <div class="scrim" id="ascrim"></div>
+    <div
+      class="modal"
+      id="authm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Log in or sign up"
+      hidden
+    >
+      <div class="dh">
+        <h2 id="amt2">Log in</h2>
+        <button class="x" id="aclose" aria-label="Close">✕</button>
+      </div>
+      <div class="tabs" id="atabs">
+        <button class="atab" data-am="login" aria-pressed="true">Log in</button
+        ><button class="atab" data-am="signup" aria-pressed="false">
+          Sign up
+        </button>
+      </div>
+      <label id="aname" hidden
+        >Full name<input id="an" autocomplete="name"
+      /></label>
+      <label id="aphone"
+        >Phone number<input
+          id="ap"
+          type="tel"
+          inputmode="tel"
+          autocomplete="tel"
+          placeholder="07XX XXX XXX"
+      /></label>
+      <label
+        >Password<input
+          id="apw"
+          type="password"
+          autocomplete="current-password"
+          minlength="8"
+          maxlength="128"
+          aria-describedby="pwhelp"
+      /></label>
+      <p class="hint" id="pwhelp">
+        For sign-up: at least 8 characters, including uppercase, lowercase and
+        a number.
+      </p>
+      <label id="apwconfirm-label" hidden
+        >Confirm password<input
+          id="apwconfirm"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          maxlength="128"
+      /></label>
+      <p class="err" id="aerr" role="alert"></p>
+      <button class="btn" id="asub" type="button">Log in</button>
+      <p class="hint" id="anote"></p>
     </div>
-  </div>
-  <div class="grid" id="grid"></div>
-  <div class="more"><button class="btn ghost" id="more" type="button">View more</button></div>
-</section>
-
-<section class="wrap paynow" id="pay-now" data-view="payment">
-  <h2>Pay with mobile money</h2>
-  <p>Choose MTN or Airtel, enter your number and the amount, and we send a code to your phone.</p>
-  <div class="paybtns">
-    <button class="paylink big" data-pay="MTN Mobile Money"><span class="pl lg-mtn" role="img" aria-label="MTN logo"></span>MTN Mobile Money</button>
-    <button class="paylink big" data-pay="Airtel Money"><span class="pl lg-airtel" role="img" aria-label="Airtel logo"></span>Airtel Money</button>
-  </div>
-</section>
-
-<section class="wrap steps" id="how" data-view="payment">
-  <h2 style="font-size:clamp(28px,4vw,40px)">Book in three steps</h2>
-  <ol>
-    <li><h3>Choose your car</h3><p>Pick the dates and a car that fits your trip and your group.</p></li>
-    <li><h3>Send your request</h3><p>Add your name and phone number. We confirm by call or WhatsApp within an hour.</p></li>
-    <li><h3>Pick up and go</h3><p>Show your driving licence, check the car with us and drive off.</p></li>
-  </ol>
-</section>
-<section class="wrap account" id="account" data-view="account">
-  <h2 id="acname">My account</h2>
-  <p class="hint" id="acphone"></p>
-  <div class="stats" id="acstats"></div>
-  <h3 class="sub">My bookings</h3>
-  <div id="aclist"></div>
-  <h3 class="sub">My payments</h3>
-  <div class="tablewrap" id="acpay"></div>
-</section>
-
-<section class="wrap chat" id="chat" data-view="chat">
-  <h2>Chat with us</h2>
-  <p class="hint" id="chatwho"></p>
-  <div class="chatbox">
-    <div class="msgs" id="msgs" aria-live="polite"></div>
-    <div class="chips"><button class="chip" type="button" data-q="How much is a car per day?">Prices</button><button class="chip" type="button" data-q="How do I book a car?">How to book</button><button class="chip" type="button" data-q="How can I pay?">Payment</button><button class="chip" type="button" data-q="Can I cancel my booking?">Cancellation</button></div>
-    <div class="compose"><input id="cin" placeholder="Type your message" autocomplete="off"><button class="btn" id="chsend" type="button">Send</button></div>
-  </div>
-  <p class="hint" style="margin-top:12px">Need an answer now? <a href="https://wa.me/250783553434" target="_blank" rel="noopener">Continue on WhatsApp</a> or call 0783 553 434.</p>
-</section>
-
-<section class="wrap contact" id="contact" data-view="contact">
-  <h2>Contact us</h2>
-  <div class="cgrid">
-    <div class="cinfo">
-      <a class="cbtn" href="tel:+250783553434"><svg class="ic" aria-hidden="true"><use href="#phone"/></svg><span><small>Call us</small><b>0783 553 434</b></span></a>
-      <a class="cbtn" href="https://wa.me/250783553434" target="_blank" rel="noopener"><img class="ic" src="images/whatsapp.jpg" alt="WhatsApp logo" width="42" height="42"><span><small>WhatsApp</small><b>0783 553 434</b></span></a>
-      <a class="cbtn" href="mailto:iradukundaellaherve@gmail.com"><svg class="ic" aria-hidden="true"><use href="#mailicon"/></svg><span><small>Email</small><b>iradukundaellaherve@gmail.com</b></span></a>
-      <div class="cbtn"><svg class="ic" aria-hidden="true"><use href="#pin"/></svg><span><small>Location</small><b>Kigali, Rwanda</b></span></div>
+    <div class="admin" id="admin" hidden>
+      <div class="adhead">
+        <h2>Admin dashboard</h2>
+        <div>
+          <button class="btn" id="adout" type="button">Log out</button
+          ><button class="x" id="adclose" aria-label="Close dashboard">
+            ✕
+          </button>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div id="alerts"></div>
+      <div class="adtools">
+        <div class="tabs">
+          <button class="atab" data-at="bookings" aria-pressed="true">
+            Bookings</button
+          ><button class="atab" data-at="payments" aria-pressed="false">
+            Payments</button
+          ><button class="atab" data-at="customers" aria-pressed="false">
+            Customers</button
+          ><button class="atab" data-at="chats" aria-pressed="false">
+            Chats
+          </button
+          ><button class="atab" data-at="activity" aria-pressed="false">
+            Activity
+          </button>
+        </div>
+        <input
+          id="adq"
+          type="search"
+          placeholder="Search name, phone, car or reference"
+        />
+        <button class="btn" id="exportdata" type="button">
+          Download accounts &amp; login logs
+        </button>
+      </div>
+      <div class="tablewrap" id="adtable"></div>
+      <p class="hint">
+        Customer accounts and login activity are saved on the server. Bookings,
+        payments and chats still remain in this browser. Exports never include
+        passwords or password hashes.
+      </p>
     </div>
-    <div class="cform">
-      <label>Your name<input id="cn" autocomplete="name"></label>
-      <label>Message<textarea id="cm" rows="4" placeholder="Tell us which car and which dates you need"></textarea></label>
-      <button class="btn" id="csend" type="button">Send on WhatsApp</button>
-      <button class="btn ghost" id="cmail" type="button">Send by email</button>
-    </div>
-  </div>
-</section>
+    <div class="toast" id="toast" role="status"></div>
 
-<div class="wrap perks" data-view="payment"><span><b>Free cancellation</b> up to 24 hours before</span><span><b>Insurance</b> included</span><span><b>Pay</b> with <button class="paylink" data-pay="MTN Mobile Money"><span class="pl lg-mtn" role="img" aria-label="MTN logo"></span>MTN Mobile Money</button> or <button class="paylink" data-pay="Airtel Money"><span class="pl lg-airtel" role="img" aria-label="Airtel logo"></span>Airtel Money</button></span></div>
-</main>
-<footer><div class="wrap fgrid">
-  <div class="fcol"><h3>Location</h3><a class="floc" href="https://www.google.com/maps/search/?api=1&amp;query=Kigali%2C%20Rwanda" target="_blank" rel="noopener"><svg class="ph" aria-hidden="true"><use href="#pin"/></svg>Kigali, Rwanda</a></div>
-  <div class="fcol"><h3>Follow us</h3><div class="social">
-   <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></a>
-   <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg></a>
-   <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-  </div></div>
- </div>
- <div class="wrap fcopy">© 2026 Kigali Car Rent</div></footer>
-
-<div class="scrim" id="scrim"></div>
-<aside id="book" aria-label="Booking" aria-hidden="true">
-  <div class="dh"><h2 id="bname">Book</h2><button class="x" id="close" aria-label="Close booking">✕</button></div>
-  <label>Pick-up place<select id="bloc" data-k="loc"></select></label>
-  <div class="two"><label>Pick-up date<input type="date" id="bd1" data-k="d1"></label><label>Return date<input type="date" id="bd2" data-k="d2"></label></div>
-  <label class="chk"><input type="checkbox" id="drv"> Add a driver (+ RWF 30,000 per day)</label>
-  <div class="two"><label>Full name<input id="nm" autocomplete="name"></label><label>Phone<input id="ph" type="tel" autocomplete="tel"></label></div>
-  <fieldset class="pay"><legend>Pay with</legend><label class="opt"><input type="radio" name="pm" value="MTN Mobile Money" checked><span>MTN Mobile Money</span><span class="pl lg-mtn" role="img" aria-label="MTN logo"></span></label><label class="opt"><input type="radio" name="pm" value="Airtel Money"><span>Airtel Money</span><span class="pl lg-airtel" role="img" aria-label="Airtel logo"></span></label></fieldset>
-  <div class="sum"><span id="line1"></span><span id="line2"></span></div>
-  <div class="total"><span>Total</span><span id="total"></span></div>
-  <button class="btn" id="send" disabled>Continue to payment</button>
-  <div id="pay" hidden>
-    <div class="paytop"><span id="pmlogo" class="pl lg-mtn" role="img" aria-label="Payment method logo"></span><span id="pmname"></span></div>
-    <div id="p1" class="pstep">
-      <p class="hint">Enter the amount you want to pay and your mobile money number. We will send a payment code to that phone.</p>
-      <label>Amount (RWF)<input id="amt" type="number" inputmode="numeric" min="1"></label>
-      <div class="quick"><button type="button" class="chip" id="full">Pay full amount</button><button type="button" class="chip" id="dep">Pay 30% deposit</button></div>
-      <label>Mobile money number<input id="mm" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></label>
-      <p class="hint" id="netnote"></p>
-      <label>Full name<input id="pnm" autocomplete="name"></label>
-      <p class="err" id="e1" role="alert"></p>
-      <button class="btn" id="sendcode" type="button">Send payment code</button>
-      <button class="link" id="back1" type="button">← Back to booking</button>
-    </div>
-    <div id="p2" class="pstep" hidden>
-      <p class="hint" id="sent"></p>
-      <label>Payment code<input id="code" inputmode="numeric" maxlength="6" placeholder="Enter code" autocomplete="one-time-code"></label>
-      <p class="err" id="e2" role="alert"></p>
-      <button class="btn" id="confirm" type="button">Confirm payment</button>
-      <button class="link" id="resend" type="button">Send the code again</button>
-    </div>
-    <div id="p3" class="pstep done" hidden>
-      <h3>Payment received</h3><p class="hint" id="rcpt"></p><a class="btn" id="wasend" target="_blank" rel="noopener">Send details on WhatsApp</a>
-      <button class="link" id="finish" type="button">Done</button>
-    </div>
-  </div>
-</aside>
-<div class="scrim" id="ascrim"></div>
-<div class="modal" id="authm" role="dialog" aria-modal="true" aria-label="Log in or sign up" hidden>
-  <div class="dh"><h2 id="amt2">Log in</h2><button class="x" id="aclose" aria-label="Close">✕</button></div>
-  <div class="tabs" id="atabs"><button class="atab" data-am="login" aria-pressed="true">Log in</button><button class="atab" data-am="signup" aria-pressed="false">Sign up</button></div>
-  <label id="aname" hidden>Full name<input id="an" autocomplete="name"></label>
-  <label id="aphone">Phone number<input id="ap" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXX"></label>
-  <label>Password<input id="apw" type="password" autocomplete="current-password"></label>
-  <p class="err" id="aerr" role="alert"></p>
-  <button class="btn" id="asub" type="button">Log in</button>
-    <p class="hint" id="anote"></p>
-</div>
-<div class="admin" id="admin" hidden>
-  <div class="adhead"><h2>Admin dashboard</h2><div><button class="btn" id="adout" type="button">Log out</button><button class="x" id="adclose" aria-label="Close dashboard">✕</button></div></div>
-  <div class="stats" id="stats"></div>
-  <div id="alerts"></div>
-  <div class="adtools"><div class="tabs"><button class="atab" data-at="bookings" aria-pressed="true">Bookings</button><button class="atab" data-at="payments" aria-pressed="false">Payments</button><button class="atab" data-at="customers" aria-pressed="false">Customers</button><button class="atab" data-at="chats" aria-pressed="false">Chats</button></div><input id="adq" type="search" placeholder="Search name, phone, car or reference"></div>
-  <div class="tablewrap" id="adtable"></div>
-  <p class="hint">This dashboard shows bookings and payments saved in this browser only. Customers on other phones or computers are not collected here yet.</p>
-</div>
-<div class="toast" id="toast" role="status"></div>
-
-<script src="js/app.js"></script>
-</body>
+    <script src="js/app.js"></script>
+  </body>
 </html>

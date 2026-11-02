@@ -1,31 +1,38 @@
-# Putting Kigali Car Rent online
+# Run Kigali Car Rent with its backend
 
-This site is plain HTML, CSS and JavaScript, so any static hosting service can serve it. No build step is needed.
-Check each service's current free-plan terms before you choose.
+The site now uses a small Node.js backend and a private JSON file for customer accounts and authentication activity. It does not need a separate database service. Run it on a Node.js host; static-only hosting such as GitHub Pages cannot run the backend.
 
-## Option 1 - Netlify (drag and drop)
-1. Unzip kigali-car-rent.zip so you have the kigali-car-rent folder.
-2. Create or log in to an account at netlify.com.
-3. Add a new site and choose the manual deploy / drag-and-drop option.
-4. Drag the whole kigali-car-rent folder (the one that contains index.html) onto the page.
-5. Netlify gives you a web address. Open it to check the site.
+## Run locally
 
-## Option 2 - GitHub Pages
-1. Create a repository on github.com and upload everything inside the kigali-car-rent folder (index.html must be at the top level).
-2. Open the repository Settings, then Pages.
-3. Choose to deploy from the main branch, root folder, and save.
-4. After a minute or two the site is available at the address GitHub shows.
+Install Node.js 20 or newer. From this project folder, set a private admin password and start the server in PowerShell:
 
-## Option 3 - Cloudflare Pages
-1. Create an account at cloudflare.com and open Pages.
-2. Choose direct upload and upload the kigali-car-rent folder.
+```powershell
+$env:ADMIN_PASSWORD = "replace-this-with-a-unique-secret-of-at-least-12-characters"
+npm start
+```
 
-## Your own web address
-Buy a domain name from a domain registrar, then open your hosting service's domain settings and follow its steps to connect the domain. The registrar and the host both show the records you need to enter.
+Open `http://localhost:3000`. Select **Owner admin** in the footer and enter the configured `ADMIN_PASSWORD`. The admin password is not saved in the project.
 
-## Before you take real customers
-The site keeps bookings, payments, accounts, chat and notifications in each visitor's own browser only. To make it real you need:
-- a backend and database, so the owner can see every customer's bookings, payments and chats;
-- real MTN Mobile Money and Airtel Money payments through their business APIs or a payment service;
-- server-side login instead of the browser-only demo login;
-- your real car prices, specs, address and social media links.
+## Deploy
+
+Choose a host that supports a persistent Node.js process and writable persistent storage. Configure `ADMIN_PASSWORD` as a private environment variable in the host's settings, then run `npm start`. Use HTTPS in production; secure session cookies are enabled when `NODE_ENV=production`.
+
+The server creates `data/store.json` automatically. Keep the `data` directory on persistent storage, restrict access to it, and back it up securely. It is excluded from Git. Do not commit or publish this file.
+
+## What is stored
+
+- Customer names, phone numbers, password salts and scrypt password hashes.
+- Registration, successful/failed login, and logout events.
+- Admin login/logout events.
+
+Customer passwords must be 8–128 characters and contain at least one uppercase letter, one lowercase letter, and one number. Sign-up also asks the customer to confirm the password. Passwords are never stored in plain text and are not included in dashboard exports or activity logs. The admin dashboard is available from the **Owner admin** link in the page footer. Its Customers and Activity views and the download button use server records.
+
+Bookings, payments, chats and notifications still use each visitor's browser storage; they are not yet centralized. Accounts created before this backend was added also remain in that browser and must register again to create a server account.
+
+## Verify
+
+Run the backend tests with:
+
+```powershell
+npm test
+```
