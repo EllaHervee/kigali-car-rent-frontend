@@ -25,4 +25,5 @@ npm run lint
 npm run build
 ```
 
-See [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md) for deployment instructions.
+See [RENDER_DEPLOY.md](./RENDER_DEPLOY.md) to deploy on Render, or
+[VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md) to deploy on Vercel.

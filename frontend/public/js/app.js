@@ -928,6 +928,31 @@ function apiRequest(path, payload, method) {
     });
   });
 }
+function loadCarCatalog() {
+  apiRequest("/api/cars")
+    .then(function (result) {
+      if (!Array.isArray(result.cars)) {
+        console.warn("The server returned an invalid car catalog.");
+        return;
+      }
+      C = result.cars.map(function (car, index) {
+        return {
+          id: Number(car.id) || index + 1,
+          n: String(car.name || car.n || ""),
+          cat: String(car.cat || car.category || "economy"),
+          s: Number(car.seats || car.s) || 5,
+          tr: String(car.transmission || car.tr || "Automatic"),
+          f: String(car.fuel || car.f || "Petrol"),
+          p: Number(car.price || car.p) || 0,
+          img: String(car.img || "images/car-1.jpg"),
+        };
+      });
+      render();
+    })
+    .catch(function (error) {
+      console.warn("Could not fetch the server car catalog:", error);
+    });
+}
 function restoreServerSession() {
   apiRequest("/api/me").then(
     function (result) {
@@ -3007,4 +3032,5 @@ if (location.pathname.startsWith("/admin")) {
   else openAuth("admin");
 }
 sync();
+loadCarCatalog();
 if (LANG !== "en") applyLang(LANG);

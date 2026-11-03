@@ -5,14 +5,8 @@ const nextConfig: NextConfig = {
     const backendUrl =
       process.env.BACKEND_URL ||
       (process.env.NODE_ENV === "production"
-        ? undefined
+        ? "https://kigali-car-rent-backend.onrender.com"
         : "http://localhost:3001");
-    if (!backendUrl) {
-      console.warn(
-        "BACKEND_URL is not set; API requests will not be forwarded until the backend is deployed."
-      );
-      return [];
-    }
 
     return [
       {
