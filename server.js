@@ -24,7 +24,9 @@ if (!adminPassword || adminPassword.length < 12) {
   process.exit(1);
 }
 if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV !== "test") {
-  console.log("Notice: using default development ADMIN_PASSWORD: admin-kigali-2026");
+  console.log(
+    "Notice: using default development ADMIN_PASSWORD: admin-kigali-2026",
+  );
 }
 
 function json(res, status, value, headers) {
@@ -115,7 +117,9 @@ function saveStore() {
 
 async function readJson(req) {
   if (!String(req.headers["content-type"] || "").includes("application/json")) {
-    throw Object.assign(new Error("Send a JSON request body."), { status: 415 });
+    throw Object.assign(new Error("Send a JSON request body."), {
+      status: 415,
+    });
   }
   const chunks = [];
   let length = 0;
@@ -141,7 +145,9 @@ function sameOrigin(req) {
   const origin = req.headers.origin;
   if (!origin) return true;
   try {
-    return new URL(origin).host === req.headers.host;
+    const originHost = new URL(origin).host;
+    const reqHost = req.headers["x-forwarded-host"] || req.headers.host;
+    return originHost === reqHost || originHost === req.headers.host;
   } catch {
     return false;
   }
@@ -160,9 +166,7 @@ function allowAttempt(req, route) {
 }
 
 function resetAttempts(req, route) {
-  loginAttempts.delete(
-    route + ":" + (req.socket.remoteAddress || "unknown"),
-  );
+  loginAttempts.delete(route + ":" + (req.socket.remoteAddress || "unknown"));
 }
 
 async function passwordHash(password, salt) {
@@ -205,9 +209,12 @@ function paymentProviderConfig(provider) {
       targetEnvironment: "sandbox",
     };
     if (!config.subscriptionKey || !config.apiUser || !config.apiKey) {
-      throw Object.assign(new Error("MTN sandbox payment is not configured on the server."), {
-        status: 503,
-      });
+      throw Object.assign(
+        new Error("MTN sandbox payment is not configured on the server."),
+        {
+          status: 503,
+        },
+      );
     }
     return config;
   }
@@ -218,9 +225,12 @@ function paymentProviderConfig(provider) {
       clientSecret: process.env.AIRTEL_MONEY_CLIENT_SECRET,
     };
     if (!config.clientId || !config.clientSecret) {
-      throw Object.assign(new Error("Airtel sandbox payment is not configured on the server."), {
-        status: 503,
-      });
+      throw Object.assign(
+        new Error("Airtel sandbox payment is not configured on the server."),
+        {
+          status: 503,
+        },
+      );
     }
     return config;
   }
@@ -254,20 +264,19 @@ async function mtnToken(config) {
   const auth = Buffer.from(config.apiUser + ":" + config.apiKey).toString(
     "base64",
   );
-  const payload = await providerJson(
-    config.baseUrl + "/collection/token/",
-    {
-      method: "POST",
-      headers: {
-        Authorization: "Basic " + auth,
-        "Ocp-Apim-Subscription-Key": config.subscriptionKey,
-      },
+  const payload = await providerJson(config.baseUrl + "/collection/token/", {
+    method: "POST",
+    headers: {
+      Authorization: "Basic " + auth,
+      "Ocp-Apim-Subscription-Key": config.subscriptionKey,
     },
-  );
-  if (!payload.access_token) throw new Error("MTN did not return an access token.");
+  });
+  if (!payload.access_token)
+    throw new Error("MTN did not return an access token.");
   providerTokens.set("mtn", {
     value: payload.access_token,
-    expiresAt: Date.now() + Math.max(30, Number(payload.expires_in || 3600) - 60) * 1000,
+    expiresAt:
+      Date.now() + Math.max(30, Number(payload.expires_in || 3600) - 60) * 1000,
   });
   return payload.access_token;
 }
@@ -275,24 +284,22 @@ async function mtnToken(config) {
 async function airtelToken(config) {
   const cached = providerTokens.get("airtel");
   if (cached && cached.expiresAt > Date.now()) return cached.value;
-  const payload = await providerJson(
-    config.baseUrl + "/auth/oauth2/token",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "*/*" },
-      body: JSON.stringify({
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        grant_type: "client_credentials",
-      }),
-    },
-  );
+  const payload = await providerJson(config.baseUrl + "/auth/oauth2/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "*/*" },
+    body: JSON.stringify({
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      grant_type: "client_credentials",
+    }),
+  });
   if (!payload.access_token) {
     throw new Error("Airtel did not return an access token.");
   }
   providerTokens.set("airtel", {
     value: payload.access_token,
-    expiresAt: Date.now() + Math.max(30, Number(payload.expires_in || 3600) - 60) * 1000,
+    expiresAt:
+      Date.now() + Math.max(30, Number(payload.expires_in || 3600) - 60) * 1000,
   });
   return payload.access_token;
 }
@@ -387,9 +394,7 @@ async function readProviderPaymentStatus(payment) {
   }
   const token = await airtelToken(config);
   const payload = await providerJson(
-    config.baseUrl +
-      "/standard/v1/payments/" +
-      encodeURIComponent(payment.id),
+    config.baseUrl + "/standard/v1/payments/" + encodeURIComponent(payment.id),
     {
       method: "GET",
       headers: {
@@ -438,7 +443,8 @@ async function handleApi(req, res, url) {
   }
 
   if (req.method === "POST") {
-    if (!sameOrigin(req)) return error(res, 403, "Request origin is not allowed.");
+    if (!sameOrigin(req))
+      return error(res, 403, "Request origin is not allowed.");
     let body;
     try {
       body = await readJson(req);
@@ -460,9 +466,17 @@ async function handleApi(req, res, url) {
         return error(res, 400, "Enter a valid Rwanda mobile number.");
       }
       if (password.length < 8 || password.length > 128) {
-        return error(res, 400, "Password must be between 8 and 128 characters.");
+        return error(
+          res,
+          400,
+          "Password must be between 8 and 128 characters.",
+        );
       }
-      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      if (
+        !/[a-z]/.test(password) ||
+        !/[A-Z]/.test(password) ||
+        !/[0-9]/.test(password)
+      ) {
         return error(
           res,
           400,
@@ -471,13 +485,21 @@ async function handleApi(req, res, url) {
       }
       if (store.users[phone]) {
         await logEvent("Registration failed", phone);
-        return error(res, 409, "This number already has an account. Please log in.");
+        return error(
+          res,
+          409,
+          "This number already has an account. Please log in.",
+        );
       }
       const salt = crypto.randomBytes(16).toString("hex");
       const hash = (await passwordHash(password, salt)).toString("hex");
       if (store.users[phone]) {
         await logEvent("Registration failed", phone);
-        return error(res, 409, "This number already has an account. Please log in.");
+        return error(
+          res,
+          409,
+          "This number already has an account. Please log in.",
+        );
       }
       store.users[phone] = { name, salt, hash, createdAt: Date.now() };
       await logEvent("Registration succeeded", phone);
@@ -504,8 +526,7 @@ async function handleApi(req, res, url) {
         user ? user.salt : "kcr-invalid-account-salt",
       );
       const valid =
-        user &&
-        secureEqual(calculatedHash, Buffer.from(user.hash, "hex"));
+        user && secureEqual(calculatedHash, Buffer.from(user.hash, "hex"));
       if (!valid) {
         await logEvent("Customer login failed", phone);
         return error(res, 401, "Wrong phone number or password.");
@@ -606,8 +627,12 @@ async function handleApi(req, res, url) {
     }
 
     if (url.pathname === "/api/bookings") {
-      const car = String(body.car || "").slice(0, 100).trim();
-      const name = String(body.name || "").slice(0, 100).trim();
+      const car = String(body.car || "")
+        .slice(0, 100)
+        .trim();
+      const name = String(body.name || "")
+        .slice(0, 100)
+        .trim();
       const phone = normalizePhone(body.phone);
       const d1 = String(body.d1 || "").slice(0, 20);
       const d2 = String(body.d2 || "").slice(0, 20);
@@ -620,7 +645,11 @@ async function handleApi(req, res, url) {
       const status = String(body.status || "Booked").slice(0, 30);
 
       if (!car || !name || !phone) {
-        return error(res, 400, "Please provide car, customer name, and phone number.");
+        return error(
+          res,
+          400,
+          "Please provide car, customer name, and phone number.",
+        );
       }
 
       const ref =
@@ -659,7 +688,9 @@ async function handleApi(req, res, url) {
         return error(res, 401, "Admin login is required.");
       }
       const id = Number(body.id) || Date.now();
-      const name = String(body.name || body.n || "").slice(0, 100).trim();
+      const name = String(body.name || body.n || "")
+        .slice(0, 100)
+        .trim();
       const cat = String(body.category || body.cat || "economy").toLowerCase();
       const price = Number(body.price || body.p || 0);
       const transmission = String(body.transmission || body.tr || "Automatic");
@@ -692,9 +723,13 @@ async function handleApi(req, res, url) {
     }
 
     if (url.pathname === "/api/contact") {
-      const name = String(body.name || "").slice(0, 100).trim();
+      const name = String(body.name || "")
+        .slice(0, 100)
+        .trim();
       const phone = normalizePhone(body.phone);
-      const message = String(body.message || "").slice(0, 2000).trim();
+      const message = String(body.message || "")
+        .slice(0, 2000)
+        .trim();
       if (!name || !message) {
         return error(res, 400, "Enter your name and message.");
       }
@@ -726,11 +761,11 @@ async function handleApi(req, res, url) {
     }
   }
 
-  const paymentMatch = url.pathname.match(/^\/api\/payments\/([0-9a-f-]{36})$/i);
+  const paymentMatch = url.pathname.match(
+    /^\/api\/payments\/([0-9a-f-]{36})$/i,
+  );
   if (req.method === "GET" && paymentMatch) {
-    const payment = store.payments.find(
-      (item) => item.id === paymentMatch[1],
-    );
+    const payment = store.payments.find((item) => item.id === paymentMatch[1]);
     if (!payment) return error(res, 404, "Payment request not found.");
     if (payment.status === "pending") {
       try {
@@ -843,8 +878,11 @@ async function serveStatic(req, res, url) {
   } catch {
     return error(res, 400, "Invalid URL path.");
   }
-  if (pathname === "/" || pathname === "/admin" || pathname === "/admin/") pathname = "/index.html";
-  if (!/^\/(?:index\.html|(?:css|js|images)\/[a-zA-Z0-9._-]+)$/.test(pathname)) {
+  if (pathname === "/" || pathname === "/admin" || pathname === "/admin/")
+    pathname = "/index.html";
+  if (
+    !/^\/(?:index\.html|(?:css|js|images)\/[a-zA-Z0-9._-]+)$/.test(pathname)
+  ) {
     return error(res, 404, "File not found.");
   }
   const filePath = path.resolve(root, "." + pathname);
@@ -899,12 +937,20 @@ async function start() {
       : serveStatic(req, res, url);
     handler.catch((e) => {
       console.error(e);
-      if (!res.headersSent) error(res, 500, "The server could not complete the request.");
+      if (!res.headersSent)
+        error(res, 500, "The server could not complete the request.");
       else res.destroy();
     });
   });
-  server.listen(port, () => {
-    console.log("Kigali Car Rent server listening on port " + server.address().port);
+  const host = process.env.HOST || "0.0.0.0";
+  server.listen(port, host, () => {
+    console.log(
+      "Kigali Car Rent server listening on port " +
+        server.address().port +
+        " (host " +
+        host +
+        ")",
+    );
   });
 }
 

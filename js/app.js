@@ -927,7 +927,9 @@ function apiRequest(path, payload, method) {
   }).then(function (response) {
     return response.json().then(function (result) {
       if (!response.ok)
-        throw new Error(result.error || "The server could not complete the request.");
+        throw new Error(
+          result.error || "The server could not complete the request.",
+        );
       return result;
     });
   });
@@ -940,7 +942,11 @@ function restoreServerSession() {
         adminIn = true;
         drawAuth();
         try {
-          if (sessionStorage.getItem("kcr_ai") === "1" || location.hash === "#admin" || location.hash === "#owner") {
+          if (
+            sessionStorage.getItem("kcr_ai") === "1" ||
+            location.hash === "#admin" ||
+            location.hash === "#owner"
+          ) {
             openAdmin();
           }
         } catch (e) {}
@@ -992,11 +998,7 @@ function drawAuth() {
 function authUI() {
   var ad = amode === "admin",
     su = amode === "signup";
-  $("amt2").textContent = ad
-    ? "Admin login"
-    : su
-      ? "Sign up"
-      : "Log in";
+  $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
   $("aname").hidden = !su;
   $("aphone").hidden = ad;
   $("apwconfirm-label").hidden = !su;
@@ -1051,7 +1053,9 @@ function signOut() {
       toast("You are logged out.");
     },
     function (e) {
-      toast("You were logged out here, but the server logout failed: " + e.message);
+      toast(
+        "You were logged out here, but the server logout failed: " + e.message,
+      );
     },
   );
   if (location.hash === "#account" || location.hash === "#chat") {
@@ -1140,7 +1144,11 @@ async function openAdmin() {
     REMOTE_CARS = data.cars || [];
     REMOTE_MESSAGES = data.messages || [];
     (data.bookings || []).forEach(function (sb) {
-      if (!BK.some(function (b) { return b.ref === sb.ref; })) {
+      if (
+        !BK.some(function (b) {
+          return b.ref === sb.ref;
+        })
+      ) {
         BK.unshift(sb);
       }
     });
@@ -1169,7 +1177,9 @@ async function openAdmin() {
   document.body.style.overflow = "hidden";
   var pill = $("adstatus-pill");
   if (pill) {
-    pill.textContent = isOnline ? "🟢 Server Connected" : "🟡 Local Storage Mode";
+    pill.textContent = isOnline
+      ? "🟢 Server Connected"
+      : "🟡 Local Storage Mode";
     pill.className = "adstatus-pill " + (isOnline ? "online" : "offline");
   }
   adRender();
@@ -1184,8 +1194,13 @@ function closeAdmin() {
 }
 
 async function updateBookingStatus(ref, newStatus) {
-  var b = BK.find(function (x) { return x.ref === ref; }) ||
-    REMOTE_BOOKINGS.find(function (x) { return x.ref === ref; });
+  var b =
+    BK.find(function (x) {
+      return x.ref === ref;
+    }) ||
+    REMOTE_BOOKINGS.find(function (x) {
+      return x.ref === ref;
+    });
   if (b) {
     b.status = newStatus;
     saveBK();
@@ -1207,8 +1222,12 @@ async function updateBookingStatus(ref, newStatus) {
 
 async function deleteBooking(ref) {
   if (!confirm("Are you sure you want to delete booking " + ref + "?")) return;
-  BK = BK.filter(function (b) { return b.ref !== ref; });
-  REMOTE_BOOKINGS = REMOTE_BOOKINGS.filter(function (b) { return b.ref !== ref; });
+  BK = BK.filter(function (b) {
+    return b.ref !== ref;
+  });
+  REMOTE_BOOKINGS = REMOTE_BOOKINGS.filter(function (b) {
+    return b.ref !== ref;
+  });
   saveBK();
   renderBK();
   try {
@@ -1225,8 +1244,13 @@ async function deleteBooking(ref) {
 }
 
 async function updateCarStatus(carId, newStatus) {
-  var car = C.find(function (c) { return c.id === Number(carId); }) ||
-    REMOTE_CARS.find(function (c) { return c.id === Number(carId); });
+  var car =
+    C.find(function (c) {
+      return c.id === Number(carId);
+    }) ||
+    REMOTE_CARS.find(function (c) {
+      return c.id === Number(carId);
+    });
   var carPayload = {
     id: Number(carId),
     name: car ? car.n || car.name : "Car " + carId,
@@ -1239,11 +1263,15 @@ async function updateCarStatus(carId, newStatus) {
     console.warn("Could not update car on server:", e);
   }
   var localCustomCars = ls("kcr_custom_cars", []);
-  var idx = localCustomCars.findIndex(function (c) { return c.id === Number(carId); });
+  var idx = localCustomCars.findIndex(function (c) {
+    return c.id === Number(carId);
+  });
   if (idx > -1) localCustomCars[idx].status = newStatus;
   else localCustomCars.push(carPayload);
   ss("kcr_custom_cars", localCustomCars);
-  var remIdx = REMOTE_CARS.findIndex(function (c) { return c.id === Number(carId); });
+  var remIdx = REMOTE_CARS.findIndex(function (c) {
+    return c.id === Number(carId);
+  });
   if (remIdx > -1) REMOTE_CARS[remIdx].status = newStatus;
   else REMOTE_CARS.push(carPayload);
   adRender();
@@ -1288,9 +1316,21 @@ function exportAdminCSV() {
     });
   } else if (atab === "fleet") {
     filename = "kigali-car-rent-fleet.csv";
-    rows.push(["ID", "Name", "Category", "Price / Day", "Transmission", "Seats", "Fuel", "Status"]);
+    rows.push([
+      "ID",
+      "Name",
+      "Category",
+      "Price / Day",
+      "Transmission",
+      "Seats",
+      "Fuel",
+      "Status",
+    ]);
     C.forEach(function (c) {
-      var override = REMOTE_CARS.find(function (rc) { return rc.id === c.id; }) || {};
+      var override =
+        REMOTE_CARS.find(function (rc) {
+          return rc.id === c.id;
+        }) || {};
       rows.push([
         c.id,
         override.name || c.n,
@@ -1304,7 +1344,15 @@ function exportAdminCSV() {
     });
   } else if (atab === "payments") {
     filename = "kigali-car-rent-payments.csv";
-    rows.push(["Date", "Reference", "Customer", "Phone", "Provider", "Amount RWF", "Status"]);
+    rows.push([
+      "Date",
+      "Reference",
+      "Customer",
+      "Phone",
+      "Provider",
+      "Amount RWF",
+      "Status",
+    ]);
     REMOTE_PAYMENTS.concat(PAY).forEach(function (p) {
       rows.push([
         new Date(p.createdAt || p.ts || Date.now()).toISOString(),
@@ -1320,7 +1368,11 @@ function exportAdminCSV() {
     filename = "kigali-car-rent-customers.csv";
     rows.push(["Name", "Phone", "Joined Date"]);
     REMOTE_USERS.forEach(function (u) {
-      rows.push([u.name, u.phone, new Date(u.joinedAt || Date.now()).toISOString()]);
+      rows.push([
+        u.name,
+        u.phone,
+        new Date(u.joinedAt || Date.now()).toISOString(),
+      ]);
     });
   }
 
@@ -1614,7 +1666,12 @@ function adRender() {
       if (filterSt !== "all" && (c.status || "Available") !== filterSt) {
         return false;
       }
-      return ok([c.name || "", c.cat || "", c.transmission || "", c.fuel || ""]);
+      return ok([
+        c.name || "",
+        c.cat || "",
+        c.transmission || "",
+        c.fuel || "",
+      ]);
     });
 
     if (filteredCars.length === 0) {
@@ -1698,7 +1755,15 @@ function adRender() {
     }
   } else if (atab === "payments") {
     out = tbl(
-      ["Date", "Reference", "Customer", "Phone", "Provider", "Amount", "Status"],
+      [
+        "Date",
+        "Reference",
+        "Customer",
+        "Phone",
+        "Provider",
+        "Amount",
+        "Status",
+      ],
       allPayments
         .filter(function (p) {
           return ok([
@@ -1749,7 +1814,9 @@ function adRender() {
           "<b>" + esc(user.name || "Customer") + "</b>",
           esc(user.phone),
           dt(user.joinedAt),
-          '<span class="adbadge adbadge-booked">' + userBkCount + " bookings</span>",
+          '<span class="adbadge adbadge-booked">' +
+            userBkCount +
+            " bookings</span>",
           "<b>" + fmt(userTotalSpent) + "</b>",
           '<button class="btn ghost small" data-filtercust="' +
             esc(user.phone) +
@@ -2178,7 +2245,8 @@ document.addEventListener("click", function (e) {
     var cst = $("wcar-status").value;
     var cimg = $("wcar-img").value;
     if (!cname || cprice <= 0) {
-      $("wcar-err").textContent = "Please enter car name and a valid daily rate.";
+      $("wcar-err").textContent =
+        "Please enter car name and a valid daily rate.";
       return;
     }
     var carData = {
@@ -2560,7 +2628,10 @@ var TX = {
     "Saba kwishyura kuri telefone",
   ],
   "← Back to booking": ["← Retour à la réservation", "← Subira inyuma"],
-  "Check payment status": ["Vérifier le statut du paiement", "Reba uko kwishyura bihagaze"],
+  "Check payment status": [
+    "Vérifier le statut du paiement",
+    "Reba uko kwishyura bihagaze",
+  ],
   "Check again": ["Vérifier à nouveau", "Ongera urebe"],
   "Payment received": ["Paiement reçu", "Kwishyura byakiriwe"],
   "Payment confirmed": ["Paiement confirmé", "Kwishyura byemejwe"],
