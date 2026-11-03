@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
         ? undefined
         : "http://localhost:3001");
     if (!backendUrl) {
-      throw new Error("Set BACKEND_URL to the deployed Kigali Car Rent API.");
+      console.warn(
+        "BACKEND_URL is not set; API requests will not be forwarded until the backend is deployed."
+      );
+      return [];
     }
 
     return [

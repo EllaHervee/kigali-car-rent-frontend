@@ -6,9 +6,11 @@ deployed backend.
 
 1. Import `EllaHervee/kigali-car-rent` into Vercel.
 2. Set the project **Root Directory** to `frontend`.
-3. Set `BACKEND_URL` to the public HTTPS URL of the backend service, without a
-   trailing slash.
-4. Deploy with the default Next.js build settings.
+3. Deploy with the default Next.js build settings. The frontend can be deployed
+   before the backend, but booking, login, payment, and other API features will
+   be unavailable until the backend is deployed.
+4. Once the backend is available, set `BACKEND_URL` in Vercel to its public
+   HTTPS URL, without a trailing slash, and redeploy.
 
 Deploy the backend separately from
 [`EllaHervee/kigali-car-rent-backend`](https://github.com/EllaHervee/kigali-car-rent-backend).
