@@ -907,13 +907,7 @@ var USERS = {},
   REMOTE_BOOKINGS = [],
   REMOTE_CARS = [],
   REMOTE_MESSAGES = [],
-  adminIn = (function () {
-    try {
-      return sessionStorage.getItem("kcr_ai") === "1";
-    } catch (e) {
-      return false;
-    }
-  })(),
+  adminIn = false,
   amode = "login",
   atab = "bookings";
 function apiRequest(path, payload, method) {
@@ -941,15 +935,9 @@ function restoreServerSession() {
       if (result.user.role === "admin") {
         adminIn = true;
         drawAuth();
-        try {
-          if (
-            sessionStorage.getItem("kcr_ai") === "1" ||
-            location.hash === "#admin" ||
-            location.hash === "#owner"
-          ) {
-            openAdmin();
-          }
-        } catch (e) {}
+        if (location.hash === "#admin" || location.hash === "#owner") {
+          openAdmin();
+        }
         return;
       }
       USERS[result.user.phone] = {
@@ -963,8 +951,8 @@ function restoreServerSession() {
         route();
       }
     },
-    function () {
-      if (adminIn) drawAuth();
+    function (error) {
+      console.warn("Could not restore server session:", error);
     },
   );
 }
@@ -999,7 +987,9 @@ function authUI() {
   var ad = amode === "admin",
     su = amode === "signup";
   $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
+  $("atabs").hidden = ad;
   $("aname").hidden = !su;
+  $("aemail").hidden = !ad;
   $("aphone").hidden = ad;
   $("apwconfirm-label").hidden = !su;
   $("aerr").textContent = "";
@@ -1020,13 +1010,23 @@ function authUI() {
 }
 function openAuth(m) {
   amode = m;
-  $("an").value = $("ap").value = $("apw").value = $("apwconfirm").value = "";
+  $("an").value =
+    $("ae").value =
+    $("ap").value =
+    $("apw").value =
+    $("apwconfirm").value =
+      "";
   $("aerr").textContent = "";
   authUI();
   $("authm").hidden = false;
   $("ascrim").classList.add("on");
   setTimeout(function () {
-    (m === "signup" ? $("an") : m === "admin" ? $("apw") : $("ap")).focus();
+    (m === "signup"
+      ? $("an")
+      : m === "admin"
+        ? $("ae")
+        : $("ap")
+    ).focus();
   }, 50);
 }
 function closeAuth() {
@@ -1084,27 +1084,10 @@ $("asub").onclick = async function () {
   }
   try {
     if (amode === "admin") {
-      try {
-        await apiRequest("/api/admin/login", { password: pw });
-      } catch (err) {
-        if (err.message && err.message.toLowerCase().includes("wrong")) {
-          er.textContent = err.message;
-          return;
-        }
-        if (
-          pw === "admin-kigali-2026" ||
-          pw === "admin12345678" ||
-          pw === ls("kcr_local_admin_pw", "admin-kigali-2026")
-        ) {
-          // Allowed offline mode
-        } else {
-          er.textContent = err.message || "Wrong admin password.";
-          return;
-        }
-      }
-      try {
-        sessionStorage.setItem("kcr_ai", "1");
-      } catch (e) {}
+      await apiRequest("/api/admin/login", {
+        email: $("ae").value.trim(),
+        password: pw,
+      });
       closeAuth();
       await openAdmin();
     } else {
@@ -2084,9 +2067,6 @@ function exportLocalData() {
 
 function handleAdminLogout() {
   adminIn = false;
-  try {
-    sessionStorage.removeItem("kcr_ai");
-  } catch (e) {}
   drawAuth();
   closeAdmin();
   apiRequest("/api/logout", {}).then(
