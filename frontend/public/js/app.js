@@ -975,6 +975,7 @@ var USERS = {},
   REMOTE_MESSAGES = [],
   adminIn = false,
   adminServerConnected = false,
+  adminServerError = "",
   amode = "login",
   atab = "bookings";
 function apiRequest(path, payload, method) {
@@ -986,7 +987,22 @@ function apiRequest(path, payload, method) {
       payload === undefined ? {} : { "Content-Type": "application/json" },
     body: payload === undefined ? undefined : JSON.stringify(payload),
   }).then(function (response) {
-    return response.json().then(function (result) {
+    return response.text().then(function (text) {
+      var result;
+      try {
+        result = JSON.parse(text);
+      } catch {
+        if (!response.ok) {
+          throw new Error(
+            "The server returned an unexpected response (HTTP " +
+              response.status +
+              "). Please try again later.",
+          );
+        }
+        throw new Error(
+          "The server returned an invalid response. Please try again later.",
+        );
+      }
       if (!response.ok)
         throw new Error(
           result.error || "The server could not complete the request.",
@@ -1091,6 +1107,7 @@ function authUI() {
   $("pwhelp").hidden = !su;
   $("pwchecks").hidden = !su;
   $("apwconfirm-label").hidden = !su;
+  $("adminlogin").hidden = ad || su;
   $("aemail").firstChild.textContent = su
     ? "Email address or phone number"
     : ad
@@ -1118,7 +1135,7 @@ function authUI() {
   $("anote").textContent = ad
     ? "Use the admin email and password configured on the server."
     : !su
-      ? "Use your phone number or email to log in. Admins can sign in from the admin page."
+      ? "Use your phone number or email to log in. Admins can choose Admin sign in below."
       : "Create your account with an email address or a Rwanda phone number.";
   updatePasswordFeedback();
 }
@@ -1284,10 +1301,12 @@ $("asub").onclick = async function () {
 async function openAdmin() {
   var data = null;
   var isOnline = false;
+  adminServerError = "";
   try {
     data = await apiRequest("/api/admin/data");
     isOnline = true;
   } catch (e) {
+    adminServerError = e.message;
     console.warn("Could not fetch remote admin data:", e);
   }
 
@@ -1337,7 +1356,10 @@ async function openAdmin() {
   if (pill) {
     pill.textContent = isOnline
       ? "🟢 Server Connected"
-      : "🟡 Local Storage Mode";
+      : "⚠ Server unavailable - local data only";
+    pill.title = isOnline
+      ? ""
+      : "Remote data and changes are unavailable. " + adminServerError;
     pill.className = "adstatus-pill " + (isOnline ? "online" : "offline");
   }
   adRender();
@@ -2086,6 +2108,14 @@ function adRender() {
         .join("") +
       "</div>"
     : "";
+  if (!adminServerConnected) {
+    $("alerts").innerHTML =
+      '<div class="alerts"><b>Server connection unavailable</b><p>' +
+      "This dashboard is showing local data only; changes may not sync. " +
+      esc(adminServerError) +
+      "</p></div>" +
+      $("alerts").innerHTML;
+  }
   al.forEach(function (n) {
     n.read = true;
   });
@@ -2309,6 +2339,7 @@ document.addEventListener("click", async function (e) {
     toast("Dashboard refreshed.");
   } else if (o.id === "login") openAuth("login");
   else if (o.id === "signup") openAuth("signup");
+  else if (o.id === "adminlogin") openAuth("admin");
   else if (o.id === "lo") signOut();
   else if (o.id === "dash") openAdmin();
   else if (o.id === "adnavout" || o.id === "adout") handleAdminLogout();
