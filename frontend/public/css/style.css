@@ -1143,14 +1143,6 @@ textarea {
   color: #16794b;
   font-weight: 700;
 }
-.verify-message {
-  margin: 0;
-  padding: 12px;
-  border-radius: 10px;
-  background: var(--tint);
-  color: var(--ink);
-  font-size: 14px;
-}
 #ascrim {
   z-index: 65;
 }

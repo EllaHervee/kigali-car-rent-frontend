@@ -976,8 +976,6 @@ var USERS = {},
   adminIn = false,
   adminServerConnected = false,
   amode = "login",
-  pendingVerificationEmail = "",
-  verificationResendTimer = null,
   atab = "bookings";
 function apiRequest(path, payload, method) {
   var m = method || (payload === undefined ? "GET" : "POST");
@@ -990,16 +988,9 @@ function apiRequest(path, payload, method) {
   }).then(function (response) {
     return response.json().then(function (result) {
       if (!response.ok)
-        {
-          var requestError = new Error(
-            result.error || "The server could not complete the request.",
-          );
-          requestError.verificationRequired =
-            result.verificationRequired === true;
-          requestError.email = result.email || "";
-          requestError.retryAfterSeconds = Number(result.retryAfterSeconds) || 0;
-          throw requestError;
-        }
+        throw new Error(
+          result.error || "The server could not complete the request.",
+        );
       return result;
     });
   });
@@ -1091,27 +1082,15 @@ function drawAuth() {
 }
 function authUI() {
   var ad = amode === "admin",
-    su = amode === "signup",
-    verifying = amode === "verifyPending";
-  $("amt2").textContent = ad
-    ? "Admin login"
-    : su
-      ? "Sign up"
-      : verifying
-        ? "Check your email"
-        : "Log in";
-  $("atabs").hidden = ad || verifying;
+    su = amode === "signup";
+  $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
+  $("atabs").hidden = ad;
   $("aname").hidden = !su;
-  $("aemail").hidden = verifying;
-  $("apw-label").hidden = verifying;
+  $("aemail").hidden = false;
+  $("apw-label").hidden = false;
   $("pwhelp").hidden = !su;
   $("pwchecks").hidden = !su;
   $("apwconfirm-label").hidden = !su;
-  $("asub").hidden = verifying;
-  $("anote").hidden = verifying;
-  $("averify").hidden = !verifying;
-  $("aresend").hidden = !verifying;
-  $("averify-login").hidden = !verifying;
   $("aemail").firstChild.textContent = su
     ? "Email address or phone number"
     : ad
@@ -1140,13 +1119,7 @@ function authUI() {
     ? "Use the admin email and password configured on the server."
     : !su
       ? "Use your phone number or email to log in. Admins can sign in from the admin page."
-      : "Use an email address to receive a verification link, or continue with a Rwanda phone number.";
-  if (verifying) {
-    $("averify").textContent =
-      "We sent a confirmation link to " +
-      pendingVerificationEmail +
-      ". Open it to verify your email, then log in.";
-  }
+      : "Create your account with an email address or a Rwanda phone number.";
   updatePasswordFeedback();
 }
 function updatePasswordFeedback() {
@@ -1163,48 +1136,8 @@ function updatePasswordFeedback() {
     item.classList.toggle("met", rules[item.dataset.passwordRule]);
   });
 }
-function startVerificationResendCountdown(seconds) {
-  clearInterval(verificationResendTimer);
-  var button = $("aresend"),
-    remaining = Math.max(0, Math.ceil(Number(seconds) || 0));
-  if (!remaining) {
-    button.disabled = false;
-    button.textContent = "Resend verification email";
-    return;
-  }
-  button.disabled = true;
-  button.textContent = "Resend in " + remaining + "s";
-  verificationResendTimer = setInterval(function () {
-    remaining -= 1;
-    if (remaining <= 0) {
-      clearInterval(verificationResendTimer);
-      verificationResendTimer = null;
-      button.disabled = false;
-      button.textContent = "Resend verification email";
-    } else {
-      button.textContent = "Resend in " + remaining + "s";
-    }
-  }, 1000);
-}
-function showVerificationPending(email, retryAfterSeconds) {
-  pendingVerificationEmail = email || $("ae").value.trim();
-  $("ae").value = pendingVerificationEmail;
-  $("aerr").textContent = "";
-  amode = "verifyPending";
-  authUI();
-  startVerificationResendCountdown(retryAfterSeconds);
-  $("averify").textContent =
-    "We sent a confirmation link to " +
-    pendingVerificationEmail +
-    ". Open it to verify your email, then log in.";
-}
 function openAuth(m) {
   amode = m;
-  pendingVerificationEmail = "";
-  clearInterval(verificationResendTimer);
-  verificationResendTimer = null;
-  $("aresend").disabled = false;
-  $("aresend").textContent = "Resend verification email";
   $("an").value =
     $("ae").value =
     $("apw").value =
@@ -1239,32 +1172,6 @@ document.querySelectorAll("[data-password-toggle]").forEach(function (b) {
     b.setAttribute("aria-pressed", String(showing));
   };
 });
-$("aresend").onclick = async function () {
-  var button = $("aresend");
-  button.disabled = true;
-  $("aerr").textContent = "";
-  try {
-    var result = await apiRequest("/api/email-verification/resend", {
-      email: pendingVerificationEmail,
-    });
-    $("averify").textContent =
-      "If this address has an unverified account, a new confirmation link will be sent.";
-    startVerificationResendCountdown(result.retryAfterSeconds);
-  } catch (e) {
-    $("aerr").textContent = e.message;
-    button.disabled = false;
-  }
-};
-$("averify-login").onclick = function () {
-  clearInterval(verificationResendTimer);
-  verificationResendTimer = null;
-  $("aresend").disabled = false;
-  $("aresend").textContent = "Resend verification email";
-  amode = "login";
-  authUI();
-  $("ae").value = pendingVerificationEmail;
-  $("ae").focus();
-};
 function signIn(user) {
   var userId = user.id || user.phone || user.email;
   if (!userId) {
@@ -1361,13 +1268,6 @@ $("asub").onclick = async function () {
         identifier: identifier,
         password: pw,
       });
-      if (registration.verificationRequired) {
-        showVerificationPending(
-          registration.email || identifier,
-          registration.retryAfterSeconds,
-        );
-        return;
-      }
       signIn(registration.user);
     } else {
       var result = await apiRequest("/api/login", {
@@ -1377,14 +1277,7 @@ $("asub").onclick = async function () {
       signIn(result.user);
     }
   } catch (e) {
-    if (e.verificationRequired) {
-      showVerificationPending(
-        e.email || $("ae").value.trim(),
-        e.retryAfterSeconds,
-      );
-    } else {
-      er.textContent = e.message;
-    }
+    er.textContent = e.message;
   }
 };
 
@@ -2898,35 +2791,6 @@ document.addEventListener("click", function (e) {
 drawAuth();
 renderBK();
 restoreServerSession();
-function completeEmailVerificationFromLink() {
-  var params = new URLSearchParams(location.search),
-    token = params.get("verifyEmail");
-  if (!token) return;
-  params.delete("verifyEmail");
-  history.replaceState(
-    null,
-    "",
-    location.pathname +
-      (params.toString() ? "?" + params.toString() : "") +
-      location.hash,
-  );
-  apiRequest(
-    "/api/email-verification/confirm?token=" + encodeURIComponent(token),
-  ).then(
-    function () {
-      openAuth("login");
-      $("anote").textContent =
-        "Your email is verified. Log in to continue.";
-    },
-    function (error) {
-      openAuth("login");
-      $("aerr").textContent = error.message;
-      $("anote").textContent =
-        "If the link has expired, log in with your email and request a new one.";
-    },
-  );
-}
-completeEmailVerificationFromLink();
 var LANG = ls("kcr_lang", "en"),
   orig = new WeakMap();
 var TX = {
