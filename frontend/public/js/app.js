@@ -2103,8 +2103,6 @@ function adRender() {
 function renderAccount() {
   var u = ME && USERS[ME];
   if (!u || !$("acname")) return;
-  $("profile-name").value = u.name;
-  $("profile-error").textContent = "";
   var mine = BK.filter(function (b) {
       return b.accountId === ME || (u.phone && b.phone === u.phone);
     }),
@@ -2181,18 +2179,31 @@ function renderAccount() {
     }),
   );
 }
-$("profile-form").addEventListener("submit", async function (event) {
-  event.preventDefault();
-  var error = $("profile-error");
+$("delete-account").addEventListener("click", async function () {
+  if (
+    !window.confirm(
+      "Delete your account permanently? This cannot be undone. Your bookings and payment records will be kept.",
+    )
+  ) {
+    return;
+  }
+  var button = $("delete-account");
+  var error = $("account-delete-error");
+  var accountId = ME;
+  button.disabled = true;
   error.textContent = "";
   try {
-    var result = await apiRequest("/api/me", { name: $("profile-name").value });
-    USERS[ME].name = result.user.name;
+    await apiRequest("/api/me", undefined, "DELETE");
+    delete USERS[accountId];
+    ME = null;
     drawAuth();
-    renderAccount();
-    toast("Your name has been updated.");
+    renderBK();
+    location.hash = "#top";
+    route();
+    toast("Account deleted. Your bookings and payment records were kept.");
   } catch (e) {
     error.textContent = e.message;
+    button.disabled = false;
   }
 });
 function renderBK() {

@@ -1752,29 +1752,18 @@ body:not(.v-account) [data-view="account"] {
 .account .hint {
   margin: 4px 0 16px;
 }
-.profile-form {
-  max-width: 480px;
-  margin: 20px 0 28px;
+.account-delete {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
-.profile-form label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 700;
+.btn.danger {
+  color: #a61b1b;
+  border-color: #a61b1b;
 }
-.profile-form-row {
-  display: flex;
-  gap: 10px;
-}
-.profile-form-row input {
-  flex: 1;
-  min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font: inherit;
-}
-.profile-form .err {
-  margin: 6px 0 0;
+.account-delete .hint,
+.account-delete .err {
+  margin: 8px 0 0;
 }
 body:not(.v-chat) [data-view="chat"] {
   display: none !important;

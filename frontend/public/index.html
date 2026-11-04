@@ -262,19 +262,21 @@
       <section class="wrap account" id="account" data-view="account">
         <h2 id="acname">My account</h2>
         <p class="hint" id="acphone"></p>
-        <form class="profile-form" id="profile-form">
-          <label for="profile-name">Your name</label>
-          <div class="profile-form-row">
-            <input id="profile-name" type="text" maxlength="100" required />
-            <button class="btn" type="submit">Save name</button>
-          </div>
-          <p class="err" id="profile-error" role="alert"></p>
-        </form>
         <div class="stats" id="acstats"></div>
         <h3 class="sub">My bookings</h3>
         <div id="aclist"></div>
         <h3 class="sub">My payments</h3>
         <div class="tablewrap" id="acpay"></div>
+        <div class="account-delete">
+          <button class="btn danger" id="delete-account" type="button">
+            Delete account
+          </button>
+          <p class="hint">
+            Your account will be deleted. Existing bookings and payment records
+            will be kept.
+          </p>
+          <p class="err" id="account-delete-error" role="alert"></p>
+        </div>
       </section>
 
       <section class="wrap chat" id="chat" data-view="chat">
