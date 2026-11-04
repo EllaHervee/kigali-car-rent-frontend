@@ -2114,3 +2114,149 @@ body:not(.v-chat) [data-view="chat"] {
   font-weight: 600;
   color: var(--ink);
 }
+
+@media (max-width: 760px) {
+  html {
+    scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 150px);
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 12px;
+    height: auto;
+    padding: 8px 16px 10px;
+  }
+  .logo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .logo img {
+    height: 40px;
+  }
+  .right {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  #langlabel {
+    display: none;
+  }
+  #langbtn {
+    padding: 6px 2px;
+  }
+  .bell {
+    width: 36px;
+    height: 36px;
+  }
+  #auth {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  #auth .btn {
+    padding: 7px 9px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .searchbar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    order: initial;
+    width: 100%;
+    flex-basis: auto;
+  }
+  .searchbar input {
+    padding: 9px 13px;
+  }
+  .bar2 {
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 6px 16px;
+  }
+  .bar2 nav {
+    flex: 1;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .bar2 nav::-webkit-scrollbar,
+  .fleet .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .bar2 nav a {
+    flex: none;
+    font-size: 14px;
+  }
+  .hero {
+    padding: 36px 16px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 8.5vw, 44px);
+    line-height: 1.08;
+  }
+  .hero p {
+    font-size: 16px;
+    margin: 14px 0 20px;
+  }
+  .fleet {
+    padding: 32px 16px;
+  }
+  .fleet .head {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .fleet .tabs {
+    max-width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .fleet .tab {
+    flex: none;
+    padding: 7px 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 6px;
+    padding-inline: 12px;
+  }
+  .logo img {
+    height: 36px;
+    max-width: 100%;
+  }
+  .right {
+    gap: 4px;
+  }
+  #auth {
+    gap: 4px;
+  }
+  #auth .btn {
+    padding: 7px 7px;
+    font-size: 12px;
+  }
+  .bar2 {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  .bar2 nav {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 500px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
