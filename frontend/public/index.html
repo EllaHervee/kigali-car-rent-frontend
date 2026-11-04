@@ -761,7 +761,13 @@
                 <option value="Maintenance">Maintenance</option>
               </select>
             </label>
-            <label>Image Preset
+            <label>Upload a Car Photo
+              <input id="wcar-image-file" type="file" accept="image/jpeg,image/png,image/webp" />
+              <small>JPG, PNG, or WebP, up to 10 MB. Uploading replaces the selected photo.</small>
+            </label>
+          </div>
+          <div class="two">
+            <label>Or Choose an Existing Photo
               <select id="wcar-img" class="adfilter-select">
                 <option value="images/car-1.jpg">car-1 (Toyota Land Cruiser V8)</option>
                 <option value="images/car-2.jpg">car-2 (Toyota RAV4 Hybrid)</option>
@@ -777,6 +783,10 @@
                 <option value="images/car-12.jpg">car-12 (Toyota Yaris)</option>
               </select>
             </label>
+            <div class="wcar-image-preview">
+              <img id="wcar-image-preview" alt="Car photo preview" hidden />
+              <span id="wcar-image-placeholder">Car photo preview</span>
+            </div>
           </div>
           <p class="err" id="wcar-err" role="alert"></p>
         </div>

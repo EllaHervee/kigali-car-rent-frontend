@@ -310,6 +310,68 @@ var LOC = [
 var $ = function (i) {
   return document.getElementById(i);
 };
+var wcarCurrentImage = "images/car-1.jpg";
+var wcarImageData = "";
+var wcarImageProcessing = false;
+var wcarImageRequestId = 0;
+var MAX_CAR_IMAGE_DATA_LENGTH = 70 * 1024;
+function setCarImagePreview(src) {
+  var image = $("wcar-image-preview");
+  var placeholder = $("wcar-image-placeholder");
+  image.hidden = !src;
+  placeholder.hidden = !!src;
+  if (src) image.src = src;
+  else image.removeAttribute("src");
+}
+function encodeCarImage(file) {
+  if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+    return Promise.reject(new Error("Choose a JPG, PNG, or WebP image."));
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return Promise.reject(new Error("Choose an image smaller than 10 MB."));
+  }
+  if (typeof createImageBitmap !== "function") {
+    return Promise.reject(
+      new Error("This browser cannot process the selected photo."),
+    );
+  }
+  return createImageBitmap(file).then(function (bitmap) {
+    var scale = Math.min(1, 1000 / bitmap.width, 700 / bitmap.height);
+    var width = Math.max(1, Math.round(bitmap.width * scale));
+    var height = Math.max(1, Math.round(bitmap.height * scale));
+    var originalWidth = width;
+    var originalHeight = height;
+    var resizeScale = 1;
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    if (!context) {
+      bitmap.close();
+      throw new Error("The browser could not prepare this image.");
+    }
+
+    var data;
+    while (true) {
+      canvas.width = width;
+      canvas.height = height;
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(bitmap, 0, 0, width, height);
+      data = canvas.toDataURL("image/jpeg", 0.78);
+      if (data.length <= MAX_CAR_IMAGE_DATA_LENGTH) break;
+      if (Math.max(width, height) <= 320) {
+        bitmap.close();
+        throw new Error(
+          "This image could not be compressed enough. Choose another photo.",
+        );
+      }
+      resizeScale *= 0.8;
+      width = Math.max(1, Math.round(originalWidth * resizeScale));
+      height = Math.max(1, Math.round(originalHeight * resizeScale));
+    }
+    bitmap.close();
+    return data;
+  });
+}
 var fmt = function (n) {
   return "RWF " + n.toLocaleString("en-US");
 };
@@ -908,6 +970,7 @@ var USERS = {},
   REMOTE_CARS = [],
   REMOTE_MESSAGES = [],
   adminIn = false,
+  adminServerConnected = false,
   amode = "login",
   atab = "bookings";
 function apiRequest(path, payload, method) {
@@ -1179,6 +1242,7 @@ async function openAdmin() {
     REMOTE_MESSAGES = ls("kcr_inquiries", []);
   }
 
+  adminServerConnected = isOnline;
   adminIn = true;
   drawAuth();
   closeAuth();
@@ -2105,7 +2169,7 @@ function handleAdminLogout() {
   );
 }
 
-document.addEventListener("click", function (e) {
+document.addEventListener("click", async function (e) {
   var c = e.target.closest("[data-cancel]");
   if (c) {
     var b = BK.filter(function (x) {
@@ -2168,6 +2232,15 @@ document.addEventListener("click", function (e) {
     if ($("wcar-name")) $("wcar-name").value = "";
     if ($("wcar-price")) $("wcar-price").value = "90000";
     if ($("wcar-err")) $("wcar-err").textContent = "";
+    $("wcar-submit").disabled = false;
+    $("wcar-image-file").value = "";
+    $("wcar-image-file").disabled = false;
+    $("wcar-img").value = "images/car-1.jpg";
+    wcarCurrentImage = $("wcar-img").value;
+    wcarImageData = "";
+    wcarImageProcessing = false;
+    wcarImageRequestId += 1;
+    setCarImagePreview(wcarCurrentImage);
     if ($("admodal-car-title"))
       $("admodal-car-title").textContent = "Add Vehicle to Fleet";
     $("admodal-scrim").hidden = false;
@@ -2249,7 +2322,11 @@ document.addEventListener("click", function (e) {
     var cseats = Number($("wcar-seats").value) || 5;
     var cfuel = $("wcar-fuel").value;
     var cst = $("wcar-status").value;
-    var cimg = $("wcar-img").value;
+    var cimg = wcarImageData || wcarCurrentImage;
+    if (wcarImageProcessing) {
+      $("wcar-err").textContent = "Please wait for the photo to finish processing.";
+      return;
+    }
     if (!cname || cprice <= 0) {
       $("wcar-err").textContent =
         "Please enter car name and a valid daily rate.";
@@ -2266,6 +2343,18 @@ document.addEventListener("click", function (e) {
       status: cst,
       img: cimg,
     };
+    if (adminServerConnected) {
+      $("wcar-submit").disabled = true;
+      try {
+        await apiRequest("/api/admin/cars", carData);
+      } catch (error) {
+        $("wcar-submit").disabled = false;
+        $("wcar-err").textContent =
+          "Could not save this vehicle to the server: " + error.message;
+        return;
+      }
+      $("wcar-submit").disabled = false;
+    }
     var localCustomCars = ls("kcr_custom_cars", []);
     var existingIdx = localCustomCars.findIndex(function (c) {
       return c.id === cid;
@@ -2278,12 +2367,29 @@ document.addEventListener("click", function (e) {
     });
     if (rIdx > -1) REMOTE_CARS[rIdx] = carData;
     else REMOTE_CARS.push(carData);
-    apiRequest("/api/admin/cars", carData).catch(function (e) {
-      console.warn("Could not sync car to server:", e);
+    var catalogIdx = C.findIndex(function (c) {
+      return c.id === cid;
     });
+    var catalogCar = {
+      id: cid,
+      n: cname,
+      cat: ccat,
+      p: cprice,
+      tr: ctr,
+      s: cseats,
+      f: cfuel,
+      img: cimg,
+    };
+    if (catalogIdx > -1) C[catalogIdx] = catalogCar;
+    else C.push(catalogCar);
     $("admodal-scrim").hidden = true;
     $("admodal-car").hidden = true;
-    toast("Vehicle " + cname + " saved.");
+    toast(
+      adminServerConnected
+        ? "Vehicle " + cname + " saved."
+        : "Vehicle " + cname + " saved on this device only (server offline).",
+    );
+    render();
     adRender();
   } else if (o.dataset.viewbk) {
     var viewRef = o.dataset.viewbk;
@@ -2363,7 +2469,17 @@ document.addEventListener("click", function (e) {
       $("wcar-seats").value = ecCar.s || ecCar.seats || 5;
       $("wcar-fuel").value = ecCar.f || ecCar.fuel || "Petrol";
       $("wcar-status").value = ecCar.status || "Available";
-      $("wcar-img").value = ecCar.img || "images/car-1.jpg";
+      $("wcar-submit").disabled = false;
+      var carImage = ecCar.img || "images/car-1.jpg";
+      $("wcar-img").value = carImage;
+      if (!$("wcar-img").value) $("wcar-img").value = "images/car-1.jpg";
+      wcarCurrentImage = carImage;
+      wcarImageData = "";
+      wcarImageProcessing = false;
+      wcarImageRequestId += 1;
+      $("wcar-image-file").value = "";
+      $("wcar-image-file").disabled = false;
+      setCarImagePreview(carImage);
       if ($("admodal-car-title"))
         $("admodal-car-title").textContent =
           "Edit Vehicle: " + (ecCar.n || ecCar.name);
@@ -2386,6 +2502,39 @@ document.addEventListener("click", function (e) {
   }
 });
 document.addEventListener("change", function (e) {
+  if (e.target.id === "wcar-image-file") {
+    var selectedFile = e.target.files && e.target.files[0];
+    if (!selectedFile) return;
+    wcarImageProcessing = true;
+    var imageRequestId = ++wcarImageRequestId;
+    $("wcar-err").textContent = "";
+    encodeCarImage(selectedFile).then(
+      function (imageData) {
+        if (imageRequestId !== wcarImageRequestId) return;
+        wcarImageData = imageData;
+        wcarImageProcessing = false;
+        setCarImagePreview(imageData);
+      },
+      function (error) {
+        if (imageRequestId !== wcarImageRequestId) return;
+        wcarImageData = "";
+        wcarImageProcessing = false;
+        e.target.value = "";
+        setCarImagePreview(wcarCurrentImage);
+        $("wcar-err").textContent = error.message;
+      },
+    );
+    return;
+  }
+  if (e.target.id === "wcar-img") {
+    wcarImageRequestId += 1;
+    wcarCurrentImage = e.target.value;
+    wcarImageData = "";
+    wcarImageProcessing = false;
+    $("wcar-image-file").value = "";
+    setCarImagePreview(wcarCurrentImage);
+    return;
+  }
   var s = e.target.closest("[data-st]");
   if (s) {
     updateBookingStatus(s.dataset.st, s.value);
