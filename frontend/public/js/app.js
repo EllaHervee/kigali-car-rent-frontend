@@ -1014,8 +1014,8 @@ function authUI() {
   $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
   $("atabs").hidden = ad;
   $("aname").hidden = !su;
-  $("aemail").hidden = !ad;
-  $("aphone").hidden = ad;
+  $("aemail").hidden = su;
+  $("aphone").hidden = !su;
   $("apwconfirm-label").hidden = !su;
   $("aerr").textContent = "";
   $("asub").textContent = ad
@@ -1030,8 +1030,10 @@ function authUI() {
     b.setAttribute("aria-pressed", b.dataset.am === amode);
   });
   $("anote").textContent = ad
-    ? "Use the admin password configured on the server."
-    : "Accounts are securely saved on the Kigali Car Rent server.";
+    ? "Use the admin email and password configured on the server."
+    : !su
+      ? "Use your phone number to log in as a client, or your admin email to log in as an admin."
+      : "Accounts are securely saved on the Kigali Car Rent server.";
 }
 function openAuth(m) {
   amode = m;
@@ -1046,12 +1048,7 @@ function openAuth(m) {
   $("authm").hidden = false;
   $("ascrim").classList.add("on");
   setTimeout(function () {
-    (m === "signup"
-      ? $("an")
-      : m === "admin"
-        ? $("ae")
-        : $("ap")
-    ).focus();
+    (m === "signup" ? $("an") : $("ae")).focus();
   }, 50);
 }
 function closeAuth() {
@@ -1108,9 +1105,13 @@ $("asub").onclick = async function () {
     }
   }
   try {
-    if (amode === "admin") {
+    var identifier = $("ae").value.trim();
+    if (
+      amode === "admin" ||
+      (amode === "login" && identifier.indexOf("@") !== -1)
+    ) {
       await apiRequest("/api/admin/login", {
-        email: $("ae").value.trim(),
+        email: identifier,
         password: pw,
       });
       closeAuth();
@@ -1124,7 +1125,7 @@ $("asub").onclick = async function () {
               password: pw,
             })
           : await apiRequest("/api/login", {
-              phone: $("ap").value,
+              phone: identifier,
               password: pw,
             });
       signIn(result.user);
