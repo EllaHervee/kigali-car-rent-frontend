@@ -315,14 +315,6 @@ var wcarImageData = "";
 var wcarImageProcessing = false;
 var wcarImageRequestId = 0;
 var MAX_CAR_IMAGE_DATA_LENGTH = 70 * 1024;
-function setCarImagePreview(src) {
-  var image = $("wcar-image-preview");
-  var placeholder = $("wcar-image-placeholder");
-  image.hidden = !src;
-  placeholder.hidden = !!src;
-  if (src) image.src = src;
-  else image.removeAttribute("src");
-}
 function encodeCarImage(file) {
   if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
     return Promise.reject(new Error("Choose a JPG, PNG, or WebP image."));
@@ -2384,12 +2376,10 @@ document.addEventListener("click", async function (e) {
     $("wcar-submit").disabled = false;
     $("wcar-image-file").value = "";
     $("wcar-image-file").disabled = false;
-    $("wcar-img").value = "images/car-1.jpg";
-    wcarCurrentImage = $("wcar-img").value;
+    wcarCurrentImage = "images/car-1.jpg";
     wcarImageData = "";
     wcarImageProcessing = false;
     wcarImageRequestId += 1;
-    setCarImagePreview(wcarCurrentImage);
     if ($("admodal-car-title"))
       $("admodal-car-title").textContent = "Add Vehicle to Fleet";
     $("admodal-scrim").hidden = false;
@@ -2620,15 +2610,12 @@ document.addEventListener("click", async function (e) {
       $("wcar-status").value = ecCar.status || "Available";
       $("wcar-submit").disabled = false;
       var carImage = ecCar.img || "images/car-1.jpg";
-      $("wcar-img").value = carImage;
-      if (!$("wcar-img").value) $("wcar-img").value = "images/car-1.jpg";
       wcarCurrentImage = carImage;
       wcarImageData = "";
       wcarImageProcessing = false;
       wcarImageRequestId += 1;
       $("wcar-image-file").value = "";
       $("wcar-image-file").disabled = false;
-      setCarImagePreview(carImage);
       if ($("admodal-car-title"))
         $("admodal-car-title").textContent =
           "Edit Vehicle: " + (ecCar.n || ecCar.name);
@@ -2662,26 +2649,15 @@ document.addEventListener("change", function (e) {
         if (imageRequestId !== wcarImageRequestId) return;
         wcarImageData = imageData;
         wcarImageProcessing = false;
-        setCarImagePreview(imageData);
       },
       function (error) {
         if (imageRequestId !== wcarImageRequestId) return;
         wcarImageData = "";
         wcarImageProcessing = false;
         e.target.value = "";
-        setCarImagePreview(wcarCurrentImage);
         $("wcar-err").textContent = error.message;
       },
     );
-    return;
-  }
-  if (e.target.id === "wcar-img") {
-    wcarImageRequestId += 1;
-    wcarCurrentImage = e.target.value;
-    wcarImageData = "";
-    wcarImageProcessing = false;
-    $("wcar-image-file").value = "";
-    setCarImagePreview(wcarCurrentImage);
     return;
   }
   var s = e.target.closest("[data-st]");
