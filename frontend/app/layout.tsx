@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Kigali Car Rent",
   description: "Book your car rental in Kigali, Rwanda.",
   icons: {
-    icon: "/images/logo.jpg",
+    icon: "/favicon.png",
   },
 };
 
