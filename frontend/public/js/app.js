@@ -2111,6 +2111,8 @@ function adRender() {
 function renderAccount() {
   var u = ME && USERS[ME];
   if (!u || !$("acname")) return;
+  $("profile-name").value = u.name;
+  $("profile-error").textContent = "";
   var mine = BK.filter(function (b) {
       return b.accountId === ME || (u.phone && b.phone === u.phone);
     }),
@@ -2187,6 +2189,20 @@ function renderAccount() {
     }),
   );
 }
+$("profile-form").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  var error = $("profile-error");
+  error.textContent = "";
+  try {
+    var result = await apiRequest("/api/me", { name: $("profile-name").value });
+    USERS[ME].name = result.user.name;
+    drawAuth();
+    renderAccount();
+    toast("Your name has been updated.");
+  } catch (e) {
+    error.textContent = e.message;
+  }
+});
 function renderBK() {
   renderAccount();
   if (!$("bklist")) return;

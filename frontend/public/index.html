@@ -262,6 +262,14 @@
       <section class="wrap account" id="account" data-view="account">
         <h2 id="acname">My account</h2>
         <p class="hint" id="acphone"></p>
+        <form class="profile-form" id="profile-form">
+          <label for="profile-name">Your name</label>
+          <div class="profile-form-row">
+            <input id="profile-name" type="text" maxlength="100" required />
+            <button class="btn" type="submit">Save name</button>
+          </div>
+          <p class="err" id="profile-error" role="alert"></p>
+        </form>
         <div class="stats" id="acstats"></div>
         <h3 class="sub">My bookings</h3>
         <div id="aclist"></div>
