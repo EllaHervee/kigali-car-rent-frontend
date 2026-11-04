@@ -1097,46 +1097,34 @@ function drawAuth() {
   dotUpdate();
 }
 function authUI() {
-  var ad = amode === "admin",
-    su = amode === "signup";
-  $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
-  $("atabs").hidden = ad;
+  var su = amode === "signup";
+  $("amt2").textContent = su ? "Sign up" : "Log in";
+  $("atabs").hidden = false;
   $("aname").hidden = !su;
   $("aemail").hidden = false;
   $("apw-label").hidden = false;
   $("pwhelp").hidden = !su;
   $("pwchecks").hidden = !su;
   $("apwconfirm-label").hidden = !su;
-  $("adminlogin").hidden = ad || su;
   $("aemail").firstChild.textContent = su
     ? "Email address or phone number"
-    : ad
-      ? "Admin email address"
-      : "Phone number or email address";
+    : "Phone number or email address";
   $("ae").inputMode = "text";
   $("ae").autocomplete = "username";
   $("ae").placeholder = su
     ? "name@example.com or 07XX XXX XXX"
-    : ad
-      ? "admin@example.com"
-      : "07XX XXX XXX or name@example.com";
+    : "07XX XXX XXX or name@example.com";
   $("aerr").textContent = "";
-  $("asub").textContent = ad
-    ? "Open dashboard"
-    : su
-      ? "Create account"
-      : "Log in";
+  $("asub").textContent = su ? "Create account" : "Log in";
   $("apw").autocomplete = su ? "new-password" : "current-password";
   $("apw").maxLength = 128;
   $("apwconfirm").maxLength = 128;
   document.querySelectorAll("[data-am]").forEach(function (b) {
     b.setAttribute("aria-pressed", b.dataset.am === amode);
   });
-  $("anote").textContent = ad
-    ? "Use the admin email and password configured on the server."
-    : !su
-      ? "Use your phone number or email to log in. Admins can choose Admin sign in below."
-      : "Create your account with an email address or a Rwanda phone number.";
+  $("anote").textContent = su
+    ? "Create your account with an email address or a Rwanda phone number."
+    : "Use your phone number or email to log in.";
   updatePasswordFeedback();
 }
 function updatePasswordFeedback() {
@@ -1272,14 +1260,7 @@ $("asub").onclick = async function () {
   }
   try {
     var identifier = $("ae").value.trim();
-    if (amode === "admin") {
-      await apiRequest("/api/admin/login", {
-        email: identifier,
-        password: pw,
-      });
-      closeAuth();
-      await openAdmin();
-    } else if (amode === "signup") {
+    if (amode === "signup") {
       var registration = await apiRequest("/api/register", {
         name: $("an").value.trim(),
         identifier: identifier,
@@ -1291,7 +1272,12 @@ $("asub").onclick = async function () {
         identifier: identifier,
         password: pw,
       });
-      signIn(result.user);
+      if (result.user.role === "admin") {
+        closeAuth();
+        await openAdmin();
+      } else {
+        signIn(result.user);
+      }
     }
   } catch (e) {
     er.textContent = e.message;
@@ -2339,7 +2325,6 @@ document.addEventListener("click", async function (e) {
     toast("Dashboard refreshed.");
   } else if (o.id === "login") openAuth("login");
   else if (o.id === "signup") openAuth("signup");
-  else if (o.id === "adminlogin") openAuth("admin");
   else if (o.id === "lo") signOut();
   else if (o.id === "dash") openAdmin();
   else if (o.id === "adnavout" || o.id === "adout") handleAdminLogout();
@@ -2347,7 +2332,7 @@ document.addEventListener("click", async function (e) {
   else if (o.id === "adminnav" || o.id === "adlink") {
     e.preventDefault();
     if (adminIn) openAdmin();
-    else openAuth("admin");
+    else openAuth("login");
   } else if (o.id === "adnewbkbtn") {
     if ($("wbk-car")) {
       $("wbk-car").innerHTML = C.map(function (car) {
@@ -3311,7 +3296,7 @@ function route() {
               : "home";
   if (k === "admin" || k === "owner") {
     if (adminIn) openAdmin();
-    else openAuth("admin");
+    else openAuth("login");
     return;
   }
   if ((v === "account" || v === "chat") && !(ME && USERS[ME])) {
@@ -3331,7 +3316,7 @@ window.addEventListener("hashchange", route);
 route();
 if (location.pathname.startsWith("/admin")) {
   if (adminIn) openAdmin();
-  else openAuth("admin");
+  else openAuth("login");
 }
 sync();
 loadCarCatalog();
