@@ -526,7 +526,9 @@ document.addEventListener("click", function (e) {
     $("bname").textContent = "Book the " + cur.n;
     if (ME && USERS[ME]) {
       if (!$("nm").value) $("nm").value = USERS[ME].name;
-      if (!$("ph").value) $("ph").value = ME;
+      if (!$("ph").value && USERS[ME].phone) {
+        $("ph").value = USERS[ME].phone;
+      }
     }
     totals();
     open_(true);
@@ -768,6 +770,7 @@ function completePayment(payment) {
     amt2 = payment.amount;
   PAY.unshift({
     ref: ref,
+    accountId: ME,
     ts: payment.confirmedAt || Date.now(),
     name: nm2,
     phone: ph2,
@@ -780,6 +783,7 @@ function completePayment(payment) {
   if (!cur.only) {
     var newBk = {
       ref: ref,
+      accountId: ME,
       car: cur.n,
       d1: S.d1,
       d2: S.d2,
@@ -972,6 +976,8 @@ var USERS = {},
   adminIn = false,
   adminServerConnected = false,
   amode = "login",
+  pendingVerificationEmail = "",
+  verificationResendTimer = null,
   atab = "bookings";
 function apiRequest(path, payload, method) {
   var m = method || (payload === undefined ? "GET" : "POST");
@@ -984,9 +990,16 @@ function apiRequest(path, payload, method) {
   }).then(function (response) {
     return response.json().then(function (result) {
       if (!response.ok)
-        throw new Error(
-          result.error || "The server could not complete the request.",
-        );
+        {
+          var requestError = new Error(
+            result.error || "The server could not complete the request.",
+          );
+          requestError.verificationRequired =
+            result.verificationRequired === true;
+          requestError.email = result.email || "";
+          requestError.retryAfterSeconds = Number(result.retryAfterSeconds) || 0;
+          throw requestError;
+        }
       return result;
     });
   });
@@ -1028,12 +1041,17 @@ function restoreServerSession() {
         }
         return;
       }
-      USERS[result.user.phone] = {
+      var userId = result.user.id || result.user.phone || result.user.email;
+      if (!userId) return;
+      USERS[userId] = {
         name: result.user.name,
+        phone: result.user.phone || "",
+        email: result.user.email || "",
         t: result.user.joinedAt,
       };
-      ME = result.user.phone;
+      ME = userId;
       drawAuth();
+      loadAccountBookings();
       if (location.hash === "#account" || location.hash === "#chat") {
         closeAuth();
         route();
@@ -1073,13 +1091,39 @@ function drawAuth() {
 }
 function authUI() {
   var ad = amode === "admin",
-    su = amode === "signup";
-  $("amt2").textContent = ad ? "Admin login" : su ? "Sign up" : "Log in";
-  $("atabs").hidden = ad;
+    su = amode === "signup",
+    verifying = amode === "verifyPending";
+  $("amt2").textContent = ad
+    ? "Admin login"
+    : su
+      ? "Sign up"
+      : verifying
+        ? "Check your email"
+        : "Log in";
+  $("atabs").hidden = ad || verifying;
   $("aname").hidden = !su;
-  $("aemail").hidden = su;
-  $("aphone").hidden = !su;
+  $("aemail").hidden = verifying;
+  $("apw-label").hidden = verifying;
+  $("pwhelp").hidden = !su;
+  $("pwchecks").hidden = !su;
   $("apwconfirm-label").hidden = !su;
+  $("asub").hidden = verifying;
+  $("anote").hidden = verifying;
+  $("averify").hidden = !verifying;
+  $("aresend").hidden = !verifying;
+  $("averify-login").hidden = !verifying;
+  $("aemail").firstChild.textContent = su
+    ? "Email address or phone number"
+    : ad
+      ? "Admin email address"
+      : "Phone number or email address";
+  $("ae").inputMode = "text";
+  $("ae").autocomplete = "username";
+  $("ae").placeholder = su
+    ? "name@example.com or 07XX XXX XXX"
+    : ad
+      ? "admin@example.com"
+      : "07XX XXX XXX or name@example.com";
   $("aerr").textContent = "";
   $("asub").textContent = ad
     ? "Open dashboard"
@@ -1095,17 +1139,83 @@ function authUI() {
   $("anote").textContent = ad
     ? "Use the admin email and password configured on the server."
     : !su
-      ? "Use your phone number to log in as a client, or your admin email to log in as an admin."
-      : "Accounts are securely saved on the Kigali Car Rent server.";
+      ? "Use your phone number or email to log in. Admins can sign in from the admin page."
+      : "Use an email address to receive a verification link, or continue with a Rwanda phone number.";
+  if (verifying) {
+    $("averify").textContent =
+      "We sent a confirmation link to " +
+      pendingVerificationEmail +
+      ". Open it to verify your email, then log in.";
+  }
+  updatePasswordFeedback();
+}
+function updatePasswordFeedback() {
+  var password = $("apw").value,
+    confirm = $("apwconfirm").value,
+    rules = {
+      length: password.length >= 8 && password.length <= 128,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      match: confirm.length > 0 && password === confirm,
+    };
+  document.querySelectorAll("[data-password-rule]").forEach(function (item) {
+    item.classList.toggle("met", rules[item.dataset.passwordRule]);
+  });
+}
+function startVerificationResendCountdown(seconds) {
+  clearInterval(verificationResendTimer);
+  var button = $("aresend"),
+    remaining = Math.max(0, Math.ceil(Number(seconds) || 0));
+  if (!remaining) {
+    button.disabled = false;
+    button.textContent = "Resend verification email";
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Resend in " + remaining + "s";
+  verificationResendTimer = setInterval(function () {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(verificationResendTimer);
+      verificationResendTimer = null;
+      button.disabled = false;
+      button.textContent = "Resend verification email";
+    } else {
+      button.textContent = "Resend in " + remaining + "s";
+    }
+  }, 1000);
+}
+function showVerificationPending(email, retryAfterSeconds) {
+  pendingVerificationEmail = email || $("ae").value.trim();
+  $("ae").value = pendingVerificationEmail;
+  $("aerr").textContent = "";
+  amode = "verifyPending";
+  authUI();
+  startVerificationResendCountdown(retryAfterSeconds);
+  $("averify").textContent =
+    "We sent a confirmation link to " +
+    pendingVerificationEmail +
+    ". Open it to verify your email, then log in.";
 }
 function openAuth(m) {
   amode = m;
+  pendingVerificationEmail = "";
+  clearInterval(verificationResendTimer);
+  verificationResendTimer = null;
+  $("aresend").disabled = false;
+  $("aresend").textContent = "Resend verification email";
   $("an").value =
     $("ae").value =
-    $("ap").value =
     $("apw").value =
     $("apwconfirm").value =
       "";
+  document.querySelectorAll("[data-password-toggle]").forEach(function (b) {
+    var input = $(b.dataset.passwordToggle);
+    input.type = "password";
+    b.setAttribute("aria-label", "Show password");
+    b.setAttribute("aria-pressed", "false");
+  });
   $("aerr").textContent = "";
   authUI();
   $("authm").hidden = false;
@@ -1118,16 +1228,85 @@ function closeAuth() {
   $("authm").hidden = true;
   $("ascrim").classList.remove("on");
 }
+$("apw").addEventListener("input", updatePasswordFeedback);
+$("apwconfirm").addEventListener("input", updatePasswordFeedback);
+document.querySelectorAll("[data-password-toggle]").forEach(function (b) {
+  b.onclick = function () {
+    var input = $(b.dataset.passwordToggle),
+      showing = input.type === "password";
+    input.type = showing ? "text" : "password";
+    b.setAttribute("aria-label", showing ? "Hide password" : "Show password");
+    b.setAttribute("aria-pressed", String(showing));
+  };
+});
+$("aresend").onclick = async function () {
+  var button = $("aresend");
+  button.disabled = true;
+  $("aerr").textContent = "";
+  try {
+    var result = await apiRequest("/api/email-verification/resend", {
+      email: pendingVerificationEmail,
+    });
+    $("averify").textContent =
+      "If this address has an unverified account, a new confirmation link will be sent.";
+    startVerificationResendCountdown(result.retryAfterSeconds);
+  } catch (e) {
+    $("aerr").textContent = e.message;
+    button.disabled = false;
+  }
+};
+$("averify-login").onclick = function () {
+  clearInterval(verificationResendTimer);
+  verificationResendTimer = null;
+  $("aresend").disabled = false;
+  $("aresend").textContent = "Resend verification email";
+  amode = "login";
+  authUI();
+  $("ae").value = pendingVerificationEmail;
+  $("ae").focus();
+};
 function signIn(user) {
-  var ph = user.phone;
-  USERS[ph] = { name: user.name, t: user.joinedAt };
-  ME = ph;
+  var userId = user.id || user.phone || user.email;
+  if (!userId) {
+    $("aerr").textContent = "The server returned an invalid account.";
+    return;
+  }
+  USERS[userId] = {
+    name: user.name,
+    phone: user.phone || "",
+    email: user.email || "",
+    t: user.joinedAt,
+  };
+  ME = userId;
   closeAuth();
   drawAuth();
   renderBK();
-  toast("Welcome, " + USERS[ph].name);
+  loadAccountBookings();
+  toast("Welcome, " + USERS[userId].name);
   location.hash = "#account";
   route();
+}
+function loadAccountBookings() {
+  if (!ME) return;
+  apiRequest("/api/bookings").then(
+    function (result) {
+      if (!Array.isArray(result.bookings)) {
+        throw new Error("The server returned an invalid booking list.");
+      }
+      var byRef = new Map();
+      result.bookings.concat(BK).forEach(function (booking) {
+        if (booking && booking.ref && !byRef.has(booking.ref)) {
+          byRef.set(booking.ref, booking);
+        }
+      });
+      BK = Array.from(byRef.values());
+      saveBK();
+      renderBK();
+    },
+    function (error) {
+      console.warn("Could not load account bookings:", error);
+    },
+  );
 }
 function signOut() {
   ME = null;
@@ -1169,32 +1348,43 @@ $("asub").onclick = async function () {
   }
   try {
     var identifier = $("ae").value.trim();
-    if (
-      amode === "admin" ||
-      (amode === "login" && identifier.indexOf("@") !== -1)
-    ) {
+    if (amode === "admin") {
       await apiRequest("/api/admin/login", {
         email: identifier,
         password: pw,
       });
       closeAuth();
       await openAdmin();
+    } else if (amode === "signup") {
+      var registration = await apiRequest("/api/register", {
+        name: $("an").value.trim(),
+        identifier: identifier,
+        password: pw,
+      });
+      if (registration.verificationRequired) {
+        showVerificationPending(
+          registration.email || identifier,
+          registration.retryAfterSeconds,
+        );
+        return;
+      }
+      signIn(registration.user);
     } else {
-      var result =
-        amode === "signup"
-          ? await apiRequest("/api/register", {
-              name: $("an").value.trim(),
-              phone: $("ap").value,
-              password: pw,
-            })
-          : await apiRequest("/api/login", {
-              phone: identifier,
-              password: pw,
-            });
+      var result = await apiRequest("/api/login", {
+        identifier: identifier,
+        password: pw,
+      });
       signIn(result.user);
     }
   } catch (e) {
-    er.textContent = e.message;
+    if (e.verificationRequired) {
+      showVerificationPending(
+        e.email || $("ae").value.trim(),
+        e.retryAfterSeconds,
+      );
+    } else {
+      er.textContent = e.message;
+    }
   }
 };
 
@@ -1228,7 +1418,9 @@ async function openAdmin() {
   } else {
     REMOTE_USERS = Object.keys(USERS).map(function (ph) {
       return {
-        phone: ph,
+        id: ph,
+        phone: USERS[ph].phone || "",
+        email: USERS[ph].email || "",
         name: USERS[ph].name,
         joinedAt: USERS[ph].t || Date.now(),
       };
@@ -1439,11 +1631,11 @@ function exportAdminCSV() {
     });
   } else {
     filename = "kigali-car-rent-customers.csv";
-    rows.push(["Name", "Phone", "Joined Date"]);
+    rows.push(["Name", "Phone / Email", "Joined Date"]);
     REMOTE_USERS.forEach(function (u) {
       rows.push([
         u.name,
-        u.phone,
+        u.phone || u.email,
         new Date(u.joinedAt || Date.now()).toISOString(),
       ]);
     });
@@ -1638,6 +1830,7 @@ function adRender() {
         b.ref || "",
         b.name || "",
         b.phone || "",
+        b.accountId || "",
         b.car || "",
         b.loc || "",
       ]);
@@ -1869,30 +2062,44 @@ function adRender() {
     );
   } else if (atab === "customers") {
     out = tbl(
-      ["Name", "Phone", "Member Since", "Bookings", "Total Spent", "Action"],
+      [
+        "Name",
+        "Phone / Email",
+        "Member Since",
+        "Bookings",
+        "Total Spent",
+        "Action",
+      ],
       REMOTE_USERS.filter(function (user) {
-        return ok([user.name || "", user.phone || ""]);
+        return ok([user.name || "", user.phone || "", user.email || ""]);
       }).map(function (user) {
         var userBkCount = allBookings.filter(function (b) {
-          return b.phone === user.phone;
+          return (
+            (user.id && b.accountId === user.id) ||
+            (user.phone && b.phone === user.phone)
+          );
         }).length;
         var userTotalSpent = allPayments
           .filter(function (p) {
-            return p.phone === user.phone && p.status === "successful";
+            return (
+              ((user.id && p.accountId === user.id) ||
+                (user.phone && p.phone === user.phone)) &&
+              p.status === "successful"
+            );
           })
           .reduce(function (s, p) {
             return s + (Number(p.amount) || 0);
           }, 0);
         return tr([
           "<b>" + esc(user.name || "Customer") + "</b>",
-          esc(user.phone),
+          esc(user.phone || user.email || "—"),
           dt(user.joinedAt),
           '<span class="adbadge adbadge-booked">' +
             userBkCount +
             " bookings</span>",
           "<b>" + fmt(userTotalSpent) + "</b>",
           '<button class="btn ghost small" data-filtercust="' +
-            esc(user.phone) +
+            esc(user.id || user.phone || user.email) +
             '" type="button">View Bookings</button>',
         ]);
       }),
@@ -1925,26 +2132,42 @@ function adRender() {
     out = chatsOut + messagesOut;
   } else if (atab === "activity") {
     out = tbl(
-      ["Timestamp", "Security / System Event", "Associated Customer", "Phone"],
+      [
+        "Timestamp",
+        "Security / System Event",
+        "Associated Customer",
+        "Phone / Email",
+      ],
       REMOTE_AUTH_LOGS.slice()
         .reverse()
         .filter(function (event) {
           var user =
             REMOTE_USERS.filter(function (candidate) {
-              return candidate.phone === event.phone;
+              return (
+                candidate.id === event.phone ||
+                candidate.phone === event.phone
+              );
             })[0] || {};
-          return ok([event.action || "", user.name || "", event.phone || ""]);
+          return ok([
+            event.action || "",
+            user.name || "",
+            event.phone || "",
+            user.email || "",
+          ]);
         })
         .map(function (event) {
           var user =
             REMOTE_USERS.filter(function (candidate) {
-              return candidate.phone === event.phone;
+              return (
+                candidate.id === event.phone ||
+                candidate.phone === event.phone
+              );
             })[0] || {};
           return tr([
             dt(event.ts),
             "<b>" + esc(event.action) + "</b>",
             esc(user.name || (event.phone ? "Customer" : "Administrator")),
-            esc(event.phone || "—"),
+            esc(user.email || event.phone || "—"),
           ]);
         }),
     );
@@ -1980,16 +2203,16 @@ function renderAccount() {
   var u = ME && USERS[ME];
   if (!u || !$("acname")) return;
   var mine = BK.filter(function (b) {
-      return b.phone === ME;
+      return b.accountId === ME || (u.phone && b.phone === u.phone);
     }),
     pays = PAY.filter(function (p) {
-      return p.phone === ME;
+      return p.accountId === ME || (u.phone && p.phone === u.phone);
     }),
     paid = pays.reduce(function (s, p) {
       return s + p.amount;
     }, 0);
   $("acname").textContent = "Welcome, " + u.name;
-  $("acphone").textContent = ME;
+  $("acphone").textContent = u.phone || u.email || ME;
   $("acstats").innerHTML = [
     ["Bookings", mine.length],
     ["Total paid", fmt(paid)],
@@ -2065,7 +2288,7 @@ function renderBK() {
     return;
   }
   var list = BK.filter(function (b) {
-    return b.phone === ME;
+    return b.accountId === ME || (u.phone && b.phone === u.phone);
   });
   $("bklist").innerHTML = list.length
     ? '<div class="bkgrid">' +
@@ -2113,6 +2336,7 @@ function exportLocalData() {
       return {
         name: user.name,
         phone: user.phone,
+        email: user.email,
         joinedAt: user.joinedAt,
       };
     }),
@@ -2674,6 +2898,35 @@ document.addEventListener("click", function (e) {
 drawAuth();
 renderBK();
 restoreServerSession();
+function completeEmailVerificationFromLink() {
+  var params = new URLSearchParams(location.search),
+    token = params.get("verifyEmail");
+  if (!token) return;
+  params.delete("verifyEmail");
+  history.replaceState(
+    null,
+    "",
+    location.pathname +
+      (params.toString() ? "?" + params.toString() : "") +
+      location.hash,
+  );
+  apiRequest(
+    "/api/email-verification/confirm?token=" + encodeURIComponent(token),
+  ).then(
+    function () {
+      openAuth("login");
+      $("anote").textContent =
+        "Your email is verified. Log in to continue.";
+    },
+    function (error) {
+      openAuth("login");
+      $("aerr").textContent = error.message;
+      $("anote").textContent =
+        "If the link has expired, log in with your email and request a new one.";
+    },
+  );
+}
+completeEmailVerificationFromLink();
 var LANG = ls("kcr_lang", "en"),
   orig = new WeakMap();
 var TX = {
@@ -2906,6 +3159,10 @@ document.addEventListener("click", function (e) {
   var l = e.target.closest("[data-lang]");
   if (l) {
     applyLang(l.dataset.lang);
+    closeMenus();
+    return;
+  }
+  if (e.target.closest("#cat-home")) {
     closeMenus();
     return;
   }

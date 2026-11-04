@@ -156,7 +156,8 @@
             categories
           </button>
           <div class="catmenu" id="catmenu" hidden>
-            <button data-cat="all">All cars</button
+            <a class="catmenu-home" id="cat-home" href="#top">Home</a
+            ><button data-cat="all">All cars</button
             ><button data-cat="economy">Economy</button
             ><button data-cat="suv">SUV</button
             ><button data-cat="premium">Premium</button
@@ -580,46 +581,58 @@
       <label id="aname" hidden
         >Full name<input id="an" autocomplete="name"
       /></label>
-      <label id="aemail" hidden
-        >Phone number or admin email<input
+      <label id="aemail"
+        >Phone number or email<input
           id="ae"
           type="text"
           autocomplete="username"
-          placeholder="07XX XXX XXX or admin email"
+          placeholder="07XX XXX XXX or name@example.com"
           maxlength="254"
       /></label>
-      <label id="aphone" hidden
-        >Phone number<input
-          id="ap"
-          type="tel"
-          inputmode="tel"
-          autocomplete="tel"
-          placeholder="07XX XXX XXX"
-      /></label>
-      <label
-        >Password<input
+      <label id="apw-label"
+        >Password<div class="password-control"><input
           id="apw"
           type="password"
           autocomplete="current-password"
           minlength="8"
           maxlength="128"
-          aria-describedby="pwhelp"
-      /></label>
+          aria-describedby="pwhelp pwchecks"
+      /><button class="password-eye" type="button" data-password-toggle="apw"
+          aria-label="Show password" aria-pressed="false"
+        ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Zm10 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg></button
+      ></div></label>
       <p class="hint" id="pwhelp">
         For sign-up: at least 8 characters, including uppercase, lowercase and
         a number.
       </p>
+      <ul class="pwchecks" id="pwchecks" aria-live="polite" hidden>
+        <li data-password-rule="length">At least 8 characters</li>
+        <li data-password-rule="uppercase">One uppercase letter</li>
+        <li data-password-rule="lowercase">One lowercase letter</li>
+        <li data-password-rule="number">One number</li>
+        <li data-password-rule="match">Passwords match</li>
+      </ul>
       <label id="apwconfirm-label" hidden
-        >Confirm password<input
+        >Confirm password<div class="password-control"><input
           id="apwconfirm"
           type="password"
           autocomplete="new-password"
           minlength="8"
           maxlength="128"
-      /></label>
+      /><button class="password-eye" type="button" data-password-toggle="apwconfirm"
+          aria-label="Show password" aria-pressed="false"
+        ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Zm10 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg></button
+      ></div></label>
       <p class="err" id="aerr" role="alert"></p>
       <button class="btn" id="asub" type="button">Log in</button>
       <p class="hint" id="anote"></p>
+      <p class="verify-message" id="averify" role="status" hidden></p>
+      <button class="btn ghost" id="aresend" type="button" hidden>
+        Resend verification email
+      </button>
+      <button class="link" id="averify-login" type="button" hidden>
+        Back to log in
+      </button>
     </div>
     <div class="admin" id="admin" hidden>
       <div class="adhead">
