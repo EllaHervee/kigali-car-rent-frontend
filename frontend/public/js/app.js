@@ -1170,6 +1170,13 @@ function configureGoogleSignup() {
             );
           },
         });
+        window.google.accounts.id.renderButton($("google-signup-button"), {
+          theme: "outline",
+          size: "large",
+          text: "signup_with",
+          shape: "rectangular",
+          width: 320,
+        });
         googleSignupReady = true;
         authUI();
       };
