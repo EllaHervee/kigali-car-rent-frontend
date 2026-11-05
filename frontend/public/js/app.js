@@ -1093,8 +1093,9 @@ function drawAuth() {
           '</a><button class="btn ghost" id="lo">Log out</button>'
         : '<button class="btn ghost" id="login">Log in</button><button class="btn" id="signup">Sign up</button>');
   }
-  var chatLink = $("chatlink");
-  if (chatLink) chatLink.hidden = !u;
+  $("signed-nav-wrap").hidden = !u;
+  $("chatlink").hidden = !u;
+  document.body.classList.toggle("signed-in", Boolean(u));
   $("hero-login").hidden = Boolean(u || adminIn);
   $("hero-signup").hidden = Boolean(u || adminIn);
   dotUpdate();

@@ -149,8 +149,14 @@
           ><span id="auth"></span>
         </div>
       </div>
-      <div class="wrap bar2">
-        <nav aria-label="Main navigation"><a href="#top">Home</a></nav>
+      <div class="wrap bar2" id="signed-nav-wrap" hidden>
+        <nav id="signed-nav" aria-label="Main navigation">
+          <a href="#top">Home</a>
+          <a href="#fleet">Bookings</a>
+          <a href="#pay-now">Payment</a>
+          <a href="#chat" id="chatlink" hidden>Chat</a>
+          <a href="#contact">Contact</a>
+        </nav>
       </div>
     </header>
 
@@ -186,12 +192,7 @@
         </section>
       </div>
       <section class="wrap fleet" id="fleet" data-view="home">
-        <div class="head">
-          <div>
-            <h2>Our cars</h2>
-            <small id="range"></small>
-          </div>
-        </div>
+        <p class="fleet-intro" id="range"></p>
         <div class="fleet-gate" id="fleet-gate" hidden>
           <p>Log in or create an account to see available cars and book.</p>
           <button class="btn ghost" type="button" data-open="login">
