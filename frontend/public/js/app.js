@@ -973,6 +973,7 @@ var USERS = {},
   REMOTE_CARS = [],
   REMOTE_MESSAGES = [],
   adminIn = false,
+  serverSessionRestored = false,
   adminServerConnected = false,
   adminServerError = "",
   amode = "login",
@@ -1038,12 +1039,18 @@ function loadCarCatalog() {
 function restoreServerSession() {
   apiRequest("/api/me").then(
     function (result) {
-      if (!result.user) return;
+      serverSessionRestored = true;
+      if (!result.user) {
+        route();
+        return;
+      }
       if (result.user.role === "admin") {
         adminIn = true;
         drawAuth();
         if (location.hash === "#admin" || location.hash === "#owner") {
           openAdmin();
+        } else {
+          route();
         }
         return;
       }
@@ -1054,18 +1061,25 @@ function restoreServerSession() {
         phone: result.user.phone || "",
         email: result.user.email || "",
         t: result.user.joinedAt,
+        deletionScheduledAt: result.user.deletionScheduledAt || null,
       };
       ME = userId;
       drawAuth();
       render();
       loadAccountBookings();
-      if (location.hash === "#account" || location.hash === "#chat") {
+      if (
+        location.hash === "#account" ||
+        location.hash === "#chat" ||
+        location.hash === "#settings"
+      ) {
         closeAuth();
         route();
       }
     },
     function (error) {
+      serverSessionRestored = true;
       console.warn("Could not restore server session:", error);
+      route();
     },
   );
 }
@@ -1119,7 +1133,10 @@ function authUI() {
   $("ae").placeholder = su
     ? "name@example.com or 07XX XXX XXX"
     : "07XX XXX XXX or name@example.com";
+  $("signup-email-label").hidden =
+    !su || $("ae").value.trim().includes("@");
   $("aerr").textContent = "";
+  $("aresend").hidden = true;
   $("asub").textContent = su ? "Create account" : "Log in";
   $("apw").autocomplete = su ? "new-password" : "current-password";
   $("apw").maxLength = 128;
@@ -1132,7 +1149,7 @@ function authUI() {
       ? "Create an account or log in to continue booking your selected car."
       : "Log in to continue booking your selected car."
     : su
-      ? "Create your account with an email address or a Rwanda phone number."
+      ? "Verify your email address to activate your account. Phone sign-ups also need an email address."
       : "Use your phone number or email to log in.";
   $("google-signup-wrap").hidden = !su;
   $("google-signup-button").hidden = !googleSignupReady;
@@ -1211,6 +1228,7 @@ function openAuth(m) {
     $("apw").value =
     $("apwconfirm").value =
       "";
+  $("signup-email").value = "";
   document.querySelectorAll("[data-password-toggle]").forEach(function (b) {
     var input = $(b.dataset.passwordToggle);
     input.type = "password";
@@ -1241,6 +1259,7 @@ document.querySelectorAll("[data-password-toggle]").forEach(function (b) {
   };
 });
 function signIn(user) {
+  serverSessionRestored = true;
   var userId = user.id || user.phone || user.email;
   if (!userId) {
     $("aerr").textContent = "The server returned an invalid account.";
@@ -1251,6 +1270,7 @@ function signIn(user) {
     phone: user.phone || "",
     email: user.email || "",
     t: user.joinedAt,
+    deletionScheduledAt: user.deletionScheduledAt || null,
   };
   var bookingCarId = pendingBookingCarId;
   pendingBookingCarId = null;
@@ -1303,10 +1323,39 @@ function signOut() {
       );
     },
   );
-  if (location.hash === "#account" || location.hash === "#chat") {
+  if (
+    location.hash === "#account" ||
+    location.hash === "#chat" ||
+    location.hash === "#settings"
+  ) {
     location.hash = "#top";
     route();
   }
+}
+function verifyEmailFromLink() {
+  var params = new URLSearchParams(location.search),
+    token = params.get("verify_email");
+  if (!token) return;
+  apiRequest("/api/auth/verify-email", { token: token }).then(
+    function (result) {
+      history.replaceState(
+        null,
+        "",
+        location.pathname + location.hash,
+      );
+      signIn(result.user);
+      toast("Your email is verified. Your account is ready.");
+    },
+    function (error) {
+      history.replaceState(
+        null,
+        "",
+        location.pathname + location.hash,
+      );
+      openAuth("login");
+      $("aerr").textContent = error.message;
+    },
+  );
 }
 $("asub").onclick = async function () {
   var pw = $("apw").value,
@@ -1333,9 +1382,20 @@ $("asub").onclick = async function () {
       var registration = await apiRequest("/api/register", {
         name: $("an").value.trim(),
         identifier: identifier,
+        email: $("signup-email").value.trim(),
         password: pw,
       });
-      signIn(registration.user);
+      if (registration.verificationRequired) {
+        $("aerr").textContent = "";
+        $("anote").textContent =
+          "Account created. We sent a verification link to " +
+          registration.email +
+          ". Open that email to verify and continue.";
+        $("aresend").hidden = false;
+        $("apw").value = $("apwconfirm").value = "";
+      } else {
+        throw new Error("The server returned an invalid signup response.");
+      }
     } else {
       var result = await apiRequest("/api/login", {
         identifier: identifier,
@@ -1350,8 +1410,34 @@ $("asub").onclick = async function () {
     }
   } catch (e) {
     er.textContent = e.message;
+    $("aresend").hidden = !/verify your email/i.test(e.message);
   }
 };
+function sendVerificationEmail() {
+  var identifier = $("ae").value.trim();
+  if (!identifier) {
+    $("aerr").textContent = "Enter the email address or phone used to sign up.";
+    return;
+  }
+  $("aresend").disabled = true;
+  apiRequest("/api/auth/email/resend", { identifier: identifier }).then(
+    function () {
+      $("aerr").textContent = "";
+      $("anote").textContent =
+        "If this account needs verification, a new link has been sent to its email address.";
+    },
+    function (error) {
+      $("aerr").textContent = error.message;
+    },
+  ).finally(function () {
+    $("aresend").disabled = false;
+  });
+}
+$("aresend").onclick = sendVerificationEmail;
+$("ae").addEventListener("input", function () {
+  $("signup-email-label").hidden =
+    amode !== "signup" || $("ae").value.trim().includes("@");
+});
 
 async function openAdmin() {
   var data = null;
@@ -2256,30 +2342,59 @@ function renderAccount() {
     }),
   );
 }
+function renderAccountSettings() {
+  var u = ME && USERS[ME],
+    scheduledAt = u && u.deletionScheduledAt,
+    status = $("account-deletion-status"),
+    deleteButton = $("delete-account"),
+    cancelButton = $("cancel-account-deletion");
+  if (!u || !status || !deleteButton || !cancelButton) return;
+  status.hidden = !scheduledAt;
+  status.textContent = scheduledAt
+    ? "Your account is scheduled for permanent deletion on " +
+      new Date(scheduledAt).toLocaleDateString() +
+      ". You can cancel this request before then."
+    : "";
+  deleteButton.hidden = Boolean(scheduledAt);
+  cancelButton.hidden = !scheduledAt;
+  $("account-delete-error").textContent = "";
+}
 $("delete-account").addEventListener("click", async function () {
   if (
     !window.confirm(
-      "Delete your account permanently? This cannot be undone. Your bookings and payment records will be kept.",
+      "Schedule permanent deletion of your account 30 days from today? Existing bookings and payment records will be kept. You can cancel before the deletion date.",
     )
   ) {
     return;
   }
   var button = $("delete-account");
   var error = $("account-delete-error");
-  var accountId = ME;
   button.disabled = true;
   error.textContent = "";
   try {
-    await apiRequest("/api/me", undefined, "DELETE");
-    delete USERS[accountId];
-    ME = null;
-    drawAuth();
-    renderBK();
-    location.hash = "#top";
-    route();
-    toast("Account deleted. Your bookings and payment records were kept.");
+    var result = await apiRequest("/api/me", undefined, "DELETE");
+    USERS[ME].deletionScheduledAt = result.deletionScheduledAt;
+    renderAccountSettings();
+    toast("Account deletion scheduled. You can cancel it in Settings.");
   } catch (e) {
     error.textContent = e.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+$("cancel-account-deletion").addEventListener("click", async function () {
+  var button = $("cancel-account-deletion"),
+    error = $("account-delete-error");
+  button.disabled = true;
+  error.textContent = "";
+  try {
+    var result = await apiRequest("/api/me/cancel-deletion", {});
+    USERS[ME].deletionScheduledAt = result.deletionScheduledAt;
+    renderAccountSettings();
+    toast("Your account deletion request was cancelled.");
+  } catch (e) {
+    error.textContent = e.message;
+  } finally {
     button.disabled = false;
   }
 });
@@ -2898,9 +3013,16 @@ var TX = {
   Chat: ["Discussion", "Ubutumwa"],
   "Follow us": ["Suivez-nous", "Dukurikire"],
   Home: ["Accueil", "Ahabanza"],
+  Settings: ["Paramètres", "Igenamiterere"],
   Bookings: ["Réservations", "Kodesha"],
   Payment: ["Paiement", "Kwishyura"],
   Contact: ["Contact", "Twandikire"],
+  "Account settings": ["Paramètres du compte", "Igenamiterere rya konti"],
+  "Delete account": ["Supprimer le compte", "Siba konti"],
+  "Cancel deletion request": [
+    "Annuler la demande de suppression",
+    "Hagarika ubusabe bwo gusiba",
+  ],
   "All categories": ["Toutes les catégories", "Ibyiciro byose"],
   "All cars": ["Toutes les voitures", "Imodoka zose"],
   "Rent a car in Kigali. Drive all of Rwanda.": [
@@ -3349,15 +3471,21 @@ function route() {
           ? "contact"
           : k === "account"
             ? "account"
-            : k === "chat"
-              ? "chat"
-              : "home";
+            : k === "settings"
+              ? "settings"
+              : k === "chat"
+                ? "chat"
+                : "home";
   if (k === "admin" || k === "owner") {
     if (adminIn) openAdmin();
     else openAuth("login");
     return;
   }
-  if ((v === "account" || v === "chat") && !(ME && USERS[ME])) {
+  if (
+    serverSessionRestored &&
+    (v === "account" || v === "chat" || v === "settings") &&
+    !(ME && USERS[ME])
+  ) {
     location.hash = "#top";
     openAuth("login");
     return;
@@ -3365,6 +3493,7 @@ function route() {
   document.body.className =
     document.body.className.replace(/\bv-\w+/g, "").trim() + " v-" + v;
   if (v === "account") renderAccount();
+  if (v === "settings") renderAccountSettings();
   if (v === "chat") renderChat();
   if (v !== route.v || k === "top" || k === "") window.scrollTo(0, 0);
   if (v === "home" && k === "fleet" && $("fleet")) $("fleet").scrollIntoView();
@@ -3378,4 +3507,5 @@ if (location.pathname.startsWith("/admin")) {
 }
 sync();
 loadCarCatalog();
+verifyEmailFromLink();
 if (LANG !== "en") applyLang(LANG);

@@ -156,6 +156,7 @@
           <a href="#pay-now">Payment</a>
           <a href="#chat" id="chatlink" hidden>Chat</a>
           <a href="#contact">Contact</a>
+          <a href="#settings">Settings</a>
         </nav>
       </div>
     </header>
@@ -260,14 +261,34 @@
         <div id="aclist"></div>
         <h3 class="sub">My payments</h3>
         <div class="tablewrap" id="acpay"></div>
+      </section>
+
+      <section class="wrap settings" id="settings" data-view="settings">
+        <h2>Account settings</h2>
+        <p class="hint">Manage your account and deletion preferences.</p>
+        <div
+          class="account-deletion-status"
+          id="account-deletion-status"
+          role="status"
+          hidden
+        ></div>
         <div class="account-delete">
+          <h3>Delete account</h3>
+          <p class="hint">
+            Your account will be permanently deleted 30 days after you request
+            deletion. Existing bookings and payment records will be kept.
+          </p>
           <button class="btn danger" id="delete-account" type="button">
             Delete account
           </button>
-          <p class="hint">
-            Your account will be deleted. Existing bookings and payment records
-            will be kept.
-          </p>
+          <button
+            class="btn ghost"
+            id="cancel-account-deletion"
+            type="button"
+            hidden
+          >
+            Cancel deletion request
+          </button>
           <p class="err" id="account-delete-error" role="alert"></p>
         </div>
       </section>
@@ -592,6 +613,13 @@
           placeholder="07XX XXX XXX or name@example.com"
           maxlength="254"
       /></label>
+      <label id="signup-email-label" hidden
+        >Email address for verification<input
+          id="signup-email"
+          type="email"
+          autocomplete="email"
+          maxlength="254"
+      /></label>
       <label id="apw-label"
         >Password<div class="password-control"><input
           id="apw"
@@ -628,6 +656,9 @@
       ></div></label>
       <p class="err" id="aerr" role="alert"></p>
       <button class="btn" id="asub" type="button">Log in</button>
+      <button class="btn ghost" id="aresend" type="button" hidden>
+        Resend verification email
+      </button>
       <div class="google-signup" id="google-signup-wrap" hidden>
         <div class="google-divider"><span>or sign up with</span></div>
         <div id="google-signup-button"></div>

@@ -16,6 +16,15 @@ separately deployed backend.
    To enable Google sign-up, create a Google OAuth 2.0 Web application client,
    add the frontend's public URL as an authorized JavaScript origin, and set
    its client ID as the backend's `GOOGLE_CLIENT_ID`.
+4. Configure `RESEND_API_KEY` and `AUTH_EMAIL_FROM` on the backend. Create a
+   Resend API key and verify the sender domain/address in Resend before using
+   it. These settings send account verification links and administrator login
+   alerts to `ADMIN_EMAIL`. Phone sign-ups must also provide an email address.
+   The frontend URL used in verification links is configured by `FRONTEND_URL`.
+
+Customer account deletion is scheduled 30 days after the request and can be
+cancelled from Settings before then. Expired account profiles are purged hourly
+by the backend; booking and payment records are retained.
 
 The frontend can deploy before the backend, but booking, login, payment, and
 other API features will not work until `BACKEND_URL` points to a running

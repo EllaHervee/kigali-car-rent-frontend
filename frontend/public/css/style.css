@@ -1737,10 +1737,14 @@ footer .fcopy {
 body:not(.v-account) [data-view="account"] {
   display: none !important;
 }
+body:not(.v-settings) [data-view="settings"] {
+  display: none !important;
+}
 .account {
   padding: 48px 20px;
 }
-.account h2 {
+.account h2,
+.settings h2 {
   font-size: clamp(28px, 4vw, 40px);
 }
 .account .hint {
@@ -1758,6 +1762,25 @@ body:not(.v-account) [data-view="account"] {
 .account-delete .hint,
 .account-delete .err {
   margin: 8px 0 0;
+}
+.settings {
+  padding: 48px 20px;
+}
+.settings > .hint {
+  margin: 4px 0 16px;
+}
+.account-deletion-status {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.account-delete h3 {
+  margin: 0 0 8px;
+}
+.account-delete #cancel-account-deletion {
+  margin-left: 8px;
 }
 body:not(.v-chat) [data-view="chat"] {
   display: none !important;
