@@ -103,9 +103,9 @@
     </svg>
     <header class="top">
       <div class="wrap bar">
-        <div class="logo">
+        <a class="logo" href="#top" aria-label="Kigali Car Rent home">
           <img src="images/logo.jpg" alt="Kigali Car Rent" height="64" />
-        </div>
+        </a>
         <div class="searchbar" role="search">
           <input
             id="q"
@@ -150,27 +150,7 @@
         </div>
       </div>
       <div class="wrap bar2">
-        <div class="catwrap">
-          <button id="catbtn" type="button" aria-expanded="false">
-            <svg class="ph" aria-hidden="true"><use href="#menuicon" /></svg>All
-            categories
-          </button>
-          <div class="catmenu" id="catmenu" hidden>
-            <a class="catmenu-home" id="cat-home" href="#top">Home</a
-            ><button data-cat="all">All cars</button
-            ><button data-cat="economy">Economy</button
-            ><button data-cat="suv">SUV</button
-            ><button data-cat="premium">Premium</button
-            ><button data-cat="van">Van</button
-            ><button data-cat="safari">Safari</button>
-          </div>
-        </div>
-        <nav>
-          <a href="#top">Home</a><a href="#fleet">Bookings</a
-          ><a href="#pay-now">Payment</a
-          ><a href="#chat" id="chatlink" hidden>Chat</a
-          ><a href="#contact">Contact</a>
-        </nav>
+        <nav aria-label="Main navigation"><a href="#top">Home</a></nav>
       </div>
     </header>
 
@@ -185,6 +165,22 @@
               airport or in the city, and return where it suits you.
             </p>
             <a class="btn" href="#fleet">Book a car</a>
+            <button
+              class="btn ghost"
+              id="hero-login"
+              type="button"
+              data-open="login"
+            >
+              Log in
+            </button>
+            <button
+              class="btn ghost"
+              id="hero-signup"
+              type="button"
+              data-open="signup"
+            >
+              Sign up to book
+            </button>
           </div>
           <div id="scene"></div>
         </section>
@@ -195,19 +191,15 @@
             <h2>Our cars</h2>
             <small id="range"></small>
           </div>
-          <div class="tabs" role="group" aria-label="Filter cars">
-            <button class="tab" data-f="all" aria-pressed="true">All</button>
-            <button class="tab" data-f="economy" aria-pressed="false">
-              Economy
-            </button>
-            <button class="tab" data-f="suv" aria-pressed="false">SUV</button>
-            <button class="tab" data-f="premium" aria-pressed="false">
-              Premium</button
-            ><button class="tab" data-f="van" aria-pressed="false">Van</button
-            ><button class="tab" data-f="safari" aria-pressed="false">
-              Safari
-            </button>
-          </div>
+        </div>
+        <div class="fleet-gate" id="fleet-gate" hidden>
+          <p>Log in or create an account to see available cars and book.</p>
+          <button class="btn ghost" type="button" data-open="login">
+            Log in
+          </button>
+          <button class="btn" type="button" data-open="signup">
+            Sign up
+          </button>
         </div>
         <div class="grid" id="grid"></div>
         <div class="more">
@@ -635,6 +627,12 @@
       ></div></label>
       <p class="err" id="aerr" role="alert"></p>
       <button class="btn" id="asub" type="button">Log in</button>
+      <div class="google-signup" id="google-signup-wrap" hidden>
+        <div class="google-divider"><span>or sign up with</span></div>
+        <div id="google-signup-button"></div>
+        <p class="hint" id="google-signup-note" hidden></p>
+        <p class="err" id="google-signup-error" role="alert"></p>
+      </div>
       <p class="hint" id="anote"></p>
     </div>
     <div class="admin" id="admin" hidden>

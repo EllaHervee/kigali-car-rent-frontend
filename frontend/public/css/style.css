@@ -111,6 +111,8 @@ header.top {
     800 24px "Bricolage Grotesque",
     sans-serif;
   letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
 }
 .bar nav {
   display: flex;
@@ -155,6 +157,9 @@ header.top {
   color: var(--muted);
   font-size: 18px;
   margin: 18px 0 24px;
+}
+#top .hero .btn + .btn {
+  margin-left: 10px;
 }
 .search {
   display: grid;
@@ -206,6 +211,20 @@ select {
 .fleet {
   padding: 56px 0 40px;
 }
+.fleet-gate {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--tint);
+  text-align: center;
+}
+.fleet-gate p {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+.fleet-gate .btn + .btn {
+  margin-left: 8px;
+}
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -228,18 +247,6 @@ select {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-.tab {
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 7px 16px;
-  font-weight: 500;
-}
-.tab[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
 }
 .grid {
   display: grid;
@@ -508,11 +515,7 @@ header.top {
 .perks b {
   color: var(--blue);
 }
-.tab[aria-pressed="true"] {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-}
+
 .card .img {
   padding: 0;
 }
@@ -524,6 +527,29 @@ header.top {
 }
 .card .body {
   padding-top: 14px;
+}
+.google-signup {
+  display: grid;
+  gap: 12px;
+}
+.google-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.google-divider::before,
+.google-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+#google-signup-button {
+  display: flex;
+  justify-content: center;
 }
 .price {
   color: var(--blue);
@@ -1037,15 +1063,6 @@ textarea {
 .fleet .head small {
   color: #d3e4fa;
 }
-.fleet .tab {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
-}
-.fleet .tab[aria-pressed="true"] {
-  background: var(--accent);
-  color: #0b2a5b;
-  border-color: var(--accent);
-}
 .paynow {
   --bb: #ffc800;
   padding: 44px 20px;
@@ -1271,15 +1288,6 @@ th {
 .fleet .head small {
   color: var(--muted);
 }
-.fleet .tab {
-  color: var(--ink);
-  border-color: var(--line);
-}
-.fleet .tab[aria-pressed="true"] {
-  background: var(--blue);
-  color: #fff;
-  border-color: var(--blue);
-}
 .steps {
   --bb: #ffffff;
 }
@@ -1383,17 +1391,6 @@ th {
   box-shadow: 0 12px 32px rgba(10, 40, 90, 0.18);
   z-index: 60;
   padding: 8px;
-}
-.catmenu-home {
-  display: block;
-  padding: 9px 12px;
-  border-radius: 8px;
-  color: var(--ink);
-  font-weight: 700;
-  text-decoration: none;
-}
-.catmenu-home:hover {
-  background: var(--tint);
 }
 .nhead {
   padding: 6px 12px 8px;
@@ -1545,12 +1542,10 @@ html {
   width: 20px;
   height: 20px;
 }
-.lang,
-.catwrap {
+.lang {
   position: relative;
 }
-#langbtn,
-#catbtn {
+#langbtn {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1561,16 +1556,11 @@ html {
   font-weight: 500;
   white-space: nowrap;
 }
-#catbtn {
-  font-weight: 700;
-}
-#langbtn .ph,
-#catbtn .ph {
+#langbtn .ph {
   width: 22px;
   height: 22px;
 }
-.langmenu,
-.catmenu {
+.langmenu {
   position: absolute;
   top: 100%;
   margin-top: 6px;
@@ -1586,11 +1576,7 @@ html {
 .langmenu {
   right: 0;
 }
-.catmenu {
-  left: 0;
-}
-.langmenu button,
-.catmenu button {
+.langmenu button {
   background: none;
   border: 0;
   text-align: left;
@@ -1599,8 +1585,7 @@ html {
   font-weight: 500;
   color: var(--ink);
 }
-.langmenu button:hover,
-.catmenu button:hover {
+.langmenu button:hover {
   background: var(--tint);
 }
 .bar2 {
@@ -2248,9 +2233,6 @@ body:not(.v-chat) [data-view="chat"] {
     scrollbar-width: none;
   }
   .bar2 nav::-webkit-scrollbar,
-  .fleet .tabs::-webkit-scrollbar {
-    display: none;
-  }
   .bar2 nav a {
     flex: none;
     font-size: 14px;
@@ -2273,18 +2255,6 @@ body:not(.v-chat) [data-view="chat"] {
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 18px;
-  }
-  .fleet .tabs {
-    max-width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-  .fleet .tab {
-    flex: none;
-    padding: 7px 12px;
-    white-space: nowrap;
   }
 }
 

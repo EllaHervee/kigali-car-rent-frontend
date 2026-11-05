@@ -13,6 +13,9 @@ separately deployed backend.
    environment settings and redeploy.
 3. Configure the backend's `DATABASE_URL`, `ADMIN_PASSWORD`, and any payment
    provider credentials as private environment variables on its Render service.
+   To enable Google sign-up, create a Google OAuth 2.0 Web application client,
+   add the frontend's public URL as an authorized JavaScript origin, and set
+   its client ID as the backend's `GOOGLE_CLIENT_ID`.
 
 The frontend can deploy before the backend, but booking, login, payment, and
 other API features will not work until `BACKEND_URL` points to a running

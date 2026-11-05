@@ -17,4 +17,6 @@ Deploy the backend separately from
 [`EllaHervee/kigali-car-rent-backend`](https://github.com/EllaHervee/kigali-car-rent-backend).
 Configure its `DATABASE_URL`, `ADMIN_PASSWORD`, and payment-provider credentials
 as private environment variables. The backend creates its database table on the
-first request.
+first request. To enable Google sign-up, create a Google OAuth 2.0 Web
+application client, add the frontend's public URL as an authorized JavaScript
+origin, and set its client ID as the backend's `GOOGLE_CLIENT_ID`.

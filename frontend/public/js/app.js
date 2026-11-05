@@ -373,8 +373,8 @@ var iso = function (add) {
   return d.toISOString().slice(0, 10);
 };
 var S = { loc: LOC[0], d1: iso(1), d2: iso(4) },
-  filter = "all",
   cur = null,
+  pendingBookingCarId = null,
   activePaymentId = null,
   paymentPollTimer = null,
   paymentPollStartedAt = 0,
@@ -440,15 +440,21 @@ var query = "",
   shown = 9,
   rkey = "";
 function render() {
+  var canSeeCars = Boolean(ME && USERS[ME] && !adminIn);
+  $("fleet-gate").hidden = canSeeCars;
+  $("grid").hidden = !canSeeCars;
+  if (!canSeeCars) {
+    $("more").hidden = true;
+    return;
+  }
   var q = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   var list = C.filter(function (c) {
-    if (filter !== "all" && c.cat !== filter) return false;
     var s = [c.n, c.cat, c.f, c.tr, c.s + " seats"].join(" ").toLowerCase();
     return q.every(function (w) {
       return s.indexOf(w) > -1;
     });
   });
-  var key = filter + "|" + query;
+  var key = query;
   if (key !== rkey) {
     rkey = key;
     shown = 9;
@@ -508,28 +514,29 @@ function open_(o) {
     resetPay();
   }
 }
+function openCarBooking(id) {
+  var car = C.find(function (item) {
+    return item.id === Number(id);
+  });
+  if (!car) return;
+  if (!(ME && USERS[ME])) {
+    pendingBookingCarId = car.id;
+    openAuth("signup");
+    return;
+  }
+  pendingBookingCarId = null;
+  cur = car;
+  $("bname").textContent = "Book the " + cur.n;
+  if (!$("nm").value) $("nm").value = USERS[ME].name;
+  if (!$("ph").value && USERS[ME].phone) $("ph").value = USERS[ME].phone;
+  totals();
+  open_(true);
+}
 document.addEventListener("click", function (e) {
   var t = e.target.closest("button");
   if (!t) return;
   if (t.dataset.id) {
-    cur = C.filter(function (c) {
-      return c.id == t.dataset.id;
-    })[0];
-    $("bname").textContent = "Book the " + cur.n;
-    if (ME && USERS[ME]) {
-      if (!$("nm").value) $("nm").value = USERS[ME].name;
-      if (!$("ph").value && USERS[ME].phone) {
-        $("ph").value = USERS[ME].phone;
-      }
-    }
-    totals();
-    open_(true);
-  } else if (t.classList.contains("tab")) {
-    filter = t.dataset.f;
-    document.querySelectorAll(".tab").forEach(function (b) {
-      b.setAttribute("aria-pressed", b === t);
-    });
-    render();
+    openCarBooking(t.dataset.id);
   }
 });
 document.addEventListener("change", function (e) {
@@ -1050,6 +1057,7 @@ function restoreServerSession() {
       };
       ME = userId;
       drawAuth();
+      render();
       loadAccountBookings();
       if (location.hash === "#account" || location.hash === "#chat") {
         closeAuth();
@@ -1085,8 +1093,12 @@ function drawAuth() {
           '</a><button class="btn ghost" id="lo">Log out</button>'
         : '<button class="btn ghost" id="login">Log in</button><button class="btn" id="signup">Sign up</button>');
   }
-  $("chatlink").hidden = !u;
+  var chatLink = $("chatlink");
+  if (chatLink) chatLink.hidden = !u;
+  $("hero-login").hidden = Boolean(u || adminIn);
+  $("hero-signup").hidden = Boolean(u || adminIn);
   dotUpdate();
+  render();
 }
 function authUI() {
   var su = amode === "signup";
@@ -1114,10 +1126,61 @@ function authUI() {
   document.querySelectorAll("[data-am]").forEach(function (b) {
     b.setAttribute("aria-pressed", b.dataset.am === amode);
   });
-  $("anote").textContent = su
-    ? "Create your account with an email address or a Rwanda phone number."
-    : "Use your phone number or email to log in.";
+  $("anote").textContent = pendingBookingCarId
+    ? su
+      ? "Create an account or log in to continue booking your selected car."
+      : "Log in to continue booking your selected car."
+    : su
+      ? "Create your account with an email address or a Rwanda phone number."
+      : "Use your phone number or email to log in.";
+  $("google-signup-wrap").hidden = !su;
+  $("google-signup-button").hidden = !googleSignupReady;
+  $("google-signup-note").hidden = googleSignupReady;
+  $("google-signup-note").textContent = googleClientId
+    ? "Google sign-up is currently unavailable. Try again later."
+    : "Google sign-up is not configured. Set GOOGLE_CLIENT_ID on the backend to enable it.";
+  $("google-signup-error").textContent = "";
   updatePasswordFeedback();
+}
+var googleClientId = "",
+  googleSignupReady = false;
+function configureGoogleSignup() {
+  apiRequest("/api/auth/google/config").then(
+    function (result) {
+      googleClientId = String(result.clientId || "");
+      if (!googleClientId) return;
+      var script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.onload = function () {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: function (response) {
+            $("google-signup-error").textContent = "";
+            apiRequest("/api/auth/google", {
+              credential: response.credential,
+            }).then(
+              function (result) {
+                signIn(result.user);
+              },
+              function (error) {
+                $("google-signup-error").textContent = error.message;
+              },
+            );
+          },
+        });
+        googleSignupReady = true;
+        authUI();
+      };
+      script.onerror = function () {
+        console.warn("Could not load Google sign-in.");
+      };
+      document.head.appendChild(script);
+    },
+    function (error) {
+      console.warn("Could not load Google sign-in configuration:", error);
+    },
+  );
 }
 function updatePasswordFeedback() {
   var password = $("apw").value,
@@ -1181,12 +1244,18 @@ function signIn(user) {
     email: user.email || "",
     t: user.joinedAt,
   };
+  var bookingCarId = pendingBookingCarId;
+  pendingBookingCarId = null;
   ME = userId;
   closeAuth();
   drawAuth();
   renderBK();
   loadAccountBookings();
   toast("Welcome, " + USERS[userId].name);
+  if (bookingCarId) {
+    openCarBooking(bookingCarId);
+    return;
+  }
   location.hash = "#account";
   route();
 }
@@ -2685,13 +2754,17 @@ document.addEventListener("change", function (e) {
     adRender();
   }
 });
-$("aclose").onclick = $("ascrim").onclick = closeAuth;
+$("aclose").onclick = $("ascrim").onclick = function () {
+  pendingBookingCarId = null;
+  closeAuth();
+};
 $("adclose").onclick = closeAdmin;
 $("adout").onclick = handleAdminLogout;
 if ($("adq")) $("adq").addEventListener("input", adRender);
 if ($("adfilter")) $("adfilter").addEventListener("change", adRender);
 document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") {
+    if (!$("authm").hidden) pendingBookingCarId = null;
     closeAuth();
     $("notes").hidden = true;
     closeMenus();
@@ -2810,6 +2883,7 @@ document.addEventListener("click", function (e) {
 drawAuth();
 renderBK();
 restoreServerSession();
+configureGoogleSignup();
 var LANG = ls("kcr_lang", "en"),
   orig = new WeakMap();
 var TX = {
@@ -3020,9 +3094,7 @@ $("q").addEventListener("keydown", function (e) {
 $("qgo").onclick = goCars;
 function closeMenus() {
   $("langmenu").hidden = true;
-  $("catmenu").hidden = true;
   $("langbtn").setAttribute("aria-expanded", false);
-  $("catbtn").setAttribute("aria-expanded", false);
 }
 $("langbtn").onclick = function (e) {
   e.stopPropagation();
@@ -3031,13 +3103,6 @@ $("langbtn").onclick = function (e) {
   $("langmenu").hidden = !o;
   $("langbtn").setAttribute("aria-expanded", o);
 };
-$("catbtn").onclick = function (e) {
-  e.stopPropagation();
-  var o = $("catmenu").hidden;
-  closeMenus();
-  $("catmenu").hidden = !o;
-  $("catbtn").setAttribute("aria-expanded", o);
-};
 document.addEventListener("click", function (e) {
   var l = e.target.closest("[data-lang]");
   if (l) {
@@ -3045,30 +3110,12 @@ document.addEventListener("click", function (e) {
     closeMenus();
     return;
   }
-  if (e.target.closest("#cat-home")) {
-    closeMenus();
-    return;
-  }
-  var c = e.target.closest("[data-cat]");
-  if (c) {
-    filter = c.dataset.cat;
-    query = "";
-    $("q").value = "";
-    document.querySelectorAll(".tab").forEach(function (b) {
-      b.setAttribute("aria-pressed", b.dataset.f === filter);
-    });
-    render();
-    closeMenus();
-    if (location.hash !== "#fleet") location.hash = "#fleet";
-    else $("fleet").scrollIntoView();
-    return;
-  }
   if (e.target.closest("#more")) {
     shown += 9;
     render();
     return;
   }
-  if (!e.target.closest(".lang") && !e.target.closest(".catwrap")) closeMenus();
+  if (!e.target.closest(".lang")) closeMenus();
 });
 $("cmail").onclick = function () {
   var n = $("cn").value.trim() || "a customer";
