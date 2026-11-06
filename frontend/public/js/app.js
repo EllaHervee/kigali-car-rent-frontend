@@ -2360,6 +2360,9 @@ function adRender() {
           ]);
         })
         .map(function (event) {
+          var isAdminActivity = /^(admin\b|administrator\b)/i.test(
+            String(event.action || ""),
+          );
           var user =
             REMOTE_USERS.filter(function (candidate) {
               return (
@@ -2370,8 +2373,16 @@ function adRender() {
           return tr([
             dt(event.ts),
             "<b>" + esc(activityActionLabel(event.action)) + "</b>",
-            esc(user.name || (event.phone ? "Customer" : "Administrator")),
-            esc(user.email || event.phone || "—"),
+            esc(
+              isAdminActivity
+                ? "Administrator"
+                : user.name || (event.phone ? "Customer" : "Administrator"),
+            ),
+            esc(
+              isAdminActivity
+                ? ""
+                : user.email || event.phone || String.fromCharCode(8212),
+            ),
           ]);
         }),
     );
