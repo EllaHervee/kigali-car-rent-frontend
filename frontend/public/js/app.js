@@ -1876,6 +1876,11 @@ function activityActionLabel(action) {
   if (removedByPerson) {
     return "Car removed by an administrator: " + removedByPerson[1];
   }
+  var personRemovedCar = message.match(/^.+?\s+removed\s+(?:a\s+)?car(?:\s*[:,-]\s*(.*))?$/i);
+  if (personRemovedCar) {
+    return "Car removed by an administrator" +
+      (personRemovedCar[1] ? ": " + personRemovedCar[1] : "");
+  }
   var removedByAdmin = message.match(/^Car removed by\s+[^:]+(?::\s*(.*))?$/i);
   if (removedByAdmin) {
     return "Car removed by an administrator" +
@@ -2371,9 +2376,10 @@ function adRender() {
           ]);
         })
         .map(function (event) {
-          var isAdminActivity = /^(admin\b|administrator\b)/i.test(
-            String(event.action || ""),
-          );
+          var action = String(event.action || "");
+          var isAdminActivity =
+            /^(admin\b|administrator\b)/i.test(action) ||
+            /car.*removed|removed.*car/i.test(action);
           var user =
             REMOTE_USERS.filter(function (candidate) {
               return (
