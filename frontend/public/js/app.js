@@ -440,8 +440,7 @@ var query = "",
   shown = 9,
   rkey = "";
 function render() {
-  var canSeeCars = Boolean(ME && USERS[ME] && !adminIn);
-  $("fleet-gate").hidden = canSeeCars;
+  var canSeeCars = !adminIn;
   $("grid").hidden = !canSeeCars;
   if (!canSeeCars) {
     $("more").hidden = true;
@@ -450,9 +449,12 @@ function render() {
   var q = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   var list = C.filter(function (c) {
     var s = [c.n, c.cat, c.f, c.tr, c.s + " seats"].join(" ").toLowerCase();
-    return q.every(function (w) {
-      return s.indexOf(w) > -1;
-    });
+    return (
+      (!c.status || String(c.status).trim().toLowerCase() === "available") &&
+      q.every(function (w) {
+        return s.indexOf(w) > -1;
+      })
+    );
   });
   var key = query;
   if (key !== rkey) {
@@ -1028,6 +1030,7 @@ function loadCarCatalog() {
           f: String(car.fuel || car.f || "Petrol"),
           p: Number(car.price || car.p) || 0,
           img: String(car.img || "images/car-1.jpg"),
+          status: String(car.status || "Available"),
         };
       });
       render();
@@ -2721,6 +2724,7 @@ document.addEventListener("click", async function (e) {
       s: cseats,
       f: cfuel,
       img: cimg,
+      status: cst,
     };
     if (catalogIdx > -1) C[catalogIdx] = catalogCar;
     else C.push(catalogCar);
@@ -3036,6 +3040,10 @@ var TX = {
     ],
   "Book a car": ["Réserver une voiture", "Kodesha imodoka"],
   "Our cars": ["Nos voitures", "Imodoka zacu"],
+  "Cars available to rent": [
+    "Voitures disponibles à la location",
+    "Imodoka zihari zo gukodesha",
+  ],
   "Choose your dates and pick-up place when you book.": [
     "Choisissez vos dates et le lieu de prise en charge lors de la réservation.",
     "Hitamo amatariki n’aho utwarira imodoka igihe ukodesha.",
@@ -3277,22 +3285,26 @@ $("cmail").onclick = function () {
       return d;
     });
   sl[0].classList.add("on");
-  if (
+  var reduceMotion =
     window.matchMedia &&
-    matchMedia("(prefers-reduced-motion:reduce)").matches
-  )
-    return;
-  setInterval(function () {
-    sl[k].classList.remove("on");
-    k = (k + 1) % sl.length;
-    sl[k].classList.add("on");
-  }, 6000);
+    matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if (!reduceMotion) {
+    setInterval(function () {
+      sl[k].classList.remove("on");
+      k = (k + 1) % sl.length;
+      sl[k].classList.add("on");
+    }, 6000);
+  }
+  var lastY = window.scrollY;
   window.addEventListener(
     "scroll",
     function () {
       var y = window.scrollY;
+      if (y > lastY && y > 40) box.classList.add("is-hidden");
+      else if (y < lastY || y <= 40) box.classList.remove("is-hidden");
       if (y < 800)
         box.style.transform = "translate3d(0," + Math.round(y * 0.25) + "px,0)";
+      lastY = y;
     },
     { passive: true },
   );
