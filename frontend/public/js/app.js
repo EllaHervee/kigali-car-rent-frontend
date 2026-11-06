@@ -1863,12 +1863,23 @@ function tr(c) {
 
 function activityActionLabel(action) {
   var message = String(action || "");
-  if (/^Car removed from fleet:\s*/i.test(message)) {
-    return message.replace(/^Car removed from fleet:\s*/i, "Car removed by admin: ");
+  var loginActivity = message.match(/^Admin logged (in|out)$/i);
+  if (loginActivity) {
+    return "Administrator logged " + loginActivity[1].toLowerCase();
+  }
+  var removedFromFleet = message.match(/^Car removed from fleet:\s*(.*)$/i);
+  if (removedFromFleet) {
+    return "Car removed by an administrator" +
+      (removedFromFleet[1] ? ": " + removedFromFleet[1] : "");
   }
   var removedByPerson = message.match(/^Car\s+(.+?)\s+removed by\s+.+$/i);
   if (removedByPerson) {
-    return "Car removed by admin: " + removedByPerson[1];
+    return "Car removed by an administrator: " + removedByPerson[1];
+  }
+  var removedByAdmin = message.match(/^Car removed by\s+[^:]+(?::\s*(.*))?$/i);
+  if (removedByAdmin) {
+    return "Car removed by an administrator" +
+      (removedByAdmin[1] ? ": " + removedByAdmin[1] : "");
   }
   return message;
 }
