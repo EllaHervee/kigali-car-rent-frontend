@@ -440,6 +440,7 @@ var query = "",
   shown = 9,
   rkey = "";
 function render() {
+  C = filterRemovedCars(C);
   var canSeeCars = !adminIn;
   $("grid").hidden = !canSeeCars;
   if (!canSeeCars) {
@@ -989,6 +990,29 @@ function ss(k, v) {
     localStorage.setItem(k, JSON.stringify(v));
   } catch (e) {}
 }
+function removedCarIds() {
+  var ids = ls("kcr_removed_cars", []);
+  return Array.isArray(ids) ? ids.map(Number) : [];
+}
+function filterRemovedCars(cars) {
+  var removed = removedCarIds();
+  return cars.filter(function (car) {
+    return !removed.includes(Number(car.id));
+  });
+}
+function rememberRemovedCar(carId) {
+  var ids = removedCarIds();
+  if (!ids.includes(Number(carId))) ids.push(Number(carId));
+  ss("kcr_removed_cars", ids);
+}
+function clearRemovedCar(carId) {
+  ss(
+    "kcr_removed_cars",
+    removedCarIds().filter(function (id) {
+      return id !== Number(carId);
+    }),
+  );
+}
 var USERS = {},
   ME = null,
   PAY = ls("kcr_pay", []),
@@ -1045,7 +1069,7 @@ function loadCarCatalog() {
         console.warn("The server returned an invalid car catalog.");
         return;
       }
-      C = result.cars.map(function (car, index) {
+      C = filterRemovedCars(result.cars.map(function (car, index) {
         return {
           id: Number(car.id) || index + 1,
           n: String(car.name || car.n || ""),
@@ -1057,7 +1081,7 @@ function loadCarCatalog() {
           img: String(car.img || "images/car-1.jpg"),
           status: String(car.status || "Available"),
         };
-      });
+      }));
       render();
     })
     .catch(function (error) {
@@ -1484,7 +1508,7 @@ async function openAdmin() {
     REMOTE_AUTH_LOGS = data.authEvents || [];
     REMOTE_PAYMENTS = data.payments || [];
     REMOTE_BOOKINGS = data.bookings || [];
-    REMOTE_CARS = data.cars || [];
+    REMOTE_CARS = filterRemovedCars(data.cars || []);
     REMOTE_MESSAGES = data.messages || [];
     (data.bookings || []).forEach(function (sb) {
       if (
@@ -1511,7 +1535,7 @@ async function openAdmin() {
     REMOTE_AUTH_LOGS = ls("kcr_offline_logs", [
       { ts: Date.now(), action: "Admin session initialized", phone: null },
     ]);
-    REMOTE_CARS = ls("kcr_custom_cars", []);
+    REMOTE_CARS = filterRemovedCars(ls("kcr_custom_cars", []));
     REMOTE_MESSAGES = ls("kcr_inquiries", []);
   }
 
@@ -1589,6 +1613,61 @@ async function deleteBooking(ref) {
   } catch (e) {
     toast("Booking removed locally.");
   }
+  adRender();
+}
+
+async function deleteCar(carId) {
+  var car =
+    C.find(function (item) {
+      return item.id === Number(carId);
+    }) ||
+    REMOTE_CARS.find(function (item) {
+      return Number(item.id) === Number(carId);
+    });
+  var name = car ? car.n || car.name : "this vehicle";
+  if (!confirm("Are you sure you want to remove " + name + " from the fleet?"))
+    return;
+
+  $("wcar-delete").disabled = true;
+  $("wcar-err").textContent = "";
+  if (adminServerConnected) {
+    try {
+      await apiRequest(
+        "/api/admin/cars/" + encodeURIComponent(carId),
+        undefined,
+        "DELETE",
+      );
+    } catch (error) {
+      console.warn("Could not delete car on server:", error);
+      $("wcar-err").textContent =
+        "Could not remove this vehicle from the server: " + error.message;
+      $("wcar-delete").disabled = false;
+      return;
+    }
+  }
+
+  rememberRemovedCar(carId);
+  C = C.filter(function (item) {
+    return Number(item.id) !== Number(carId);
+  });
+  REMOTE_CARS = REMOTE_CARS.filter(function (item) {
+    return Number(item.id) !== Number(carId);
+  });
+  var localCustomCars = ls("kcr_custom_cars", []);
+  ss(
+    "kcr_custom_cars",
+    localCustomCars.filter(function (item) {
+      return Number(item.id) !== Number(carId);
+    }),
+  );
+  $("admodal-scrim").hidden = true;
+  $("admodal-car").hidden = true;
+  toast(
+    adminServerConnected
+      ? "Vehicle " + name + " removed from the fleet."
+      : "Vehicle " + name + " removed on this device only (server offline).",
+  );
+  render();
   adRender();
 }
 
@@ -1783,6 +1862,7 @@ function tr(c) {
 }
 
 function adRender() {
+  C = filterRemovedCars(C);
   var q = ($("adq") ? $("adq").value : "").trim().toLowerCase();
   var filterSt = $("adfilter") ? $("adfilter").value : "all";
   var ok = function (a) {
@@ -2608,6 +2688,8 @@ document.addEventListener("click", async function (e) {
     $("admodal-view").hidden = true;
   } else if (o.id === "adnewcarbtn") {
     if ($("wcar-id")) $("wcar-id").value = "";
+    $("wcar-delete").hidden = true;
+    $("wcar-delete").disabled = false;
     if ($("wcar-name")) $("wcar-name").value = "";
     if ($("wcar-price")) $("wcar-price").value = "90000";
     if ($("wcar-err")) $("wcar-err").textContent = "";
@@ -2732,6 +2814,7 @@ document.addEventListener("click", async function (e) {
       }
       $("wcar-submit").disabled = false;
     }
+    clearRemovedCar(cid);
     var localCustomCars = ls("kcr_custom_cars", []);
     var existingIdx = localCustomCars.findIndex(function (c) {
       return c.id === cid;
@@ -2848,6 +2931,8 @@ document.addEventListener("click", async function (e) {
       $("wcar-fuel").value = ecCar.f || ecCar.fuel || "Petrol";
       $("wcar-status").value = ecCar.status || "Available";
       $("wcar-submit").disabled = false;
+      $("wcar-delete").hidden = false;
+      $("wcar-delete").disabled = false;
       var carImage = ecCar.img || "images/car-1.jpg";
       wcarCurrentImage = carImage;
       wcarImageData = "";
@@ -2863,6 +2948,8 @@ document.addEventListener("click", async function (e) {
       $("admodal-bk").hidden = true;
       $("admodal-view").hidden = true;
     }
+  } else if (o.id === "wcar-delete") {
+    await deleteCar(Number($("wcar-id").value));
   } else if (o.dataset.filtercust) {
     atab = "bookings";
     if ($("adq")) $("adq").value = o.dataset.filtercust;
