@@ -1028,6 +1028,7 @@ var USERS = {},
   adminServerConnected = false,
   adminServerError = "",
   amode = "login",
+  passwordResetToken = "",
   atab = "bookings";
 function apiRequest(path, payload, method) {
   var m = method || (payload === undefined ? "GET" : "POST");
@@ -1168,41 +1169,70 @@ function drawAuth() {
   render();
 }
 function authUI() {
-  var su = amode === "signup";
-  $("amt2").textContent = su ? "Sign up" : "Log in";
-  $("atabs").hidden = false;
+  var su = amode === "signup",
+    forgot = amode === "forgot",
+    reset = amode === "reset",
+    passwordMode = su || reset;
+  $("amt2").textContent = su
+    ? "Sign up"
+    : forgot
+      ? "Reset password"
+      : reset
+        ? "Choose a new password"
+        : "Log in";
+  $("atabs").hidden = forgot || reset;
   $("aname").hidden = !su;
-  $("aemail").hidden = false;
-  $("apw-label").hidden = false;
-  $("pwhelp").hidden = !su;
-  $("pwchecks").hidden = !su;
-  $("apwconfirm-label").hidden = !su;
+  $("aemail").hidden = reset;
+  $("apw-label").hidden = forgot;
+  $("pwhelp").hidden = !passwordMode;
+  $("pwhelp").textContent = reset
+    ? "Use at least 8 characters with uppercase, lowercase, and a number."
+    : "For sign-up: at least 8 characters, including uppercase, lowercase and a number.";
+  $("pwchecks").hidden = !passwordMode;
+  $("apwconfirm-label").hidden = !passwordMode;
   $("aemail").firstChild.textContent = su
     ? "Email address or phone number"
-    : "Phone number or email address";
-  $("ae").inputMode = "text";
-  $("ae").autocomplete = "username";
-  $("ae").placeholder = su
-    ? "name@example.com or 07XX XXX XXX"
-    : "07XX XXX XXX or name@example.com";
+    : forgot
+      ? "Email address"
+      : "Phone number or email address";
+  $("ae").type = forgot ? "email" : "text";
+  $("ae").inputMode = forgot ? "email" : "text";
+  $("ae").autocomplete = forgot ? "email" : "username";
+  $("ae").placeholder = forgot
+    ? "name@example.com"
+    : su
+      ? "name@example.com or 07XX XXX XXX"
+      : "07XX XXX XXX or name@example.com";
   $("signup-email-label").hidden =
     !su || $("ae").value.trim().includes("@");
   $("aerr").textContent = "";
   $("aresend").hidden = true;
-  $("asub").textContent = su ? "Create account" : "Log in";
-  $("apw").autocomplete = su ? "new-password" : "current-password";
+  $("aforgot").hidden = su || forgot || reset;
+  $("auth-back").hidden = !forgot && !reset;
+  $("asub").textContent = su
+    ? "Create account"
+    : forgot
+      ? "Send reset link"
+      : reset
+        ? "Save new password"
+        : "Log in";
+  $("apw").autocomplete = passwordMode ? "new-password" : "current-password";
   $("apw").maxLength = 128;
   $("apwconfirm").maxLength = 128;
   document.querySelectorAll("[data-am]").forEach(function (b) {
     b.setAttribute("aria-pressed", b.dataset.am === amode);
   });
-  $("anote").textContent = pendingBookingCarId
-    ? su
-      ? "Create an account or log in to continue booking your selected car."
-      : "Log in to continue booking your selected car."
-    : su
-      ? "Verify your email address to activate your account. Phone sign-ups also need an email address."
-      : "Use your phone number or email to log in.";
+  $("anote").textContent = forgot
+    ? "Enter the email address on your account. We will send a password reset link if it is registered."
+    : reset
+      ? "Choose a new password for your account."
+      : pendingBookingCarId
+        ? su
+          ? "Create an account or log in to continue booking your selected car."
+          : "Log in to continue booking your selected car."
+        : su
+          ? "Verify your email address to activate your account. Phone sign-ups also need an email address."
+          : "Use your phone number or email to log in.";
   $("google-signup-wrap").hidden = !su;
   $("google-signup-button").hidden = !googleSignupReady;
   $("google-signup-note").hidden = googleSignupReady;
@@ -1274,6 +1304,7 @@ function updatePasswordFeedback() {
   });
 }
 function openAuth(m) {
+  if (m !== "reset") passwordResetToken = "";
   amode = m;
   $("an").value =
     $("ae").value =
@@ -1295,6 +1326,15 @@ function openAuth(m) {
     (m === "signup" ? $("an") : $("ae")).focus();
   }, 50);
 }
+$("aforgot").onclick = function () {
+  var email = $("ae").value.trim();
+  openAuth("forgot");
+  $("ae").value = email;
+};
+$("auth-back").onclick = function () {
+  passwordResetToken = "";
+  openAuth("login");
+};
 function closeAuth() {
   $("authm").hidden = true;
   $("ascrim").classList.remove("on");
@@ -1386,7 +1426,14 @@ function signOut() {
 }
 function verifyEmailFromLink() {
   var params = new URLSearchParams(location.search),
-    token = params.get("verify_email");
+    token = params.get("verify_email"),
+    resetToken = params.get("reset_password");
+  if (resetToken) {
+    history.replaceState(null, "", location.pathname + location.hash);
+    passwordResetToken = resetToken;
+    openAuth("reset");
+    return;
+  }
   if (!token) return;
   apiRequest("/api/auth/verify-email", { token: token }).then(
     function (result) {
@@ -1413,7 +1460,7 @@ $("asub").onclick = async function () {
   var pw = $("apw").value,
     er = $("aerr");
   er.textContent = "";
-  if (amode === "signup") {
+  if (amode === "signup" || amode === "reset") {
     if (pw.length < 8 || pw.length > 128) {
       er.textContent = "Password must be between 8 and 128 characters.";
       return;
@@ -1430,6 +1477,35 @@ $("asub").onclick = async function () {
   }
   try {
     var identifier = $("ae").value.trim();
+    if (amode === "forgot") {
+      if (!identifier || !identifier.includes("@")) {
+        er.textContent = "Enter the email address on your account.";
+        return;
+      }
+      var resetRequest = await apiRequest("/api/auth/password/forgot", {
+        email: identifier,
+      });
+      $("anote").textContent = resetRequest.message;
+      return;
+    }
+    if (amode === "reset") {
+      if (pw !== $("apwconfirm").value) {
+        er.textContent = "The passwords do not match.";
+        return;
+      }
+      if (!passwordResetToken) {
+        er.textContent = "Open the password reset link from your email again.";
+        return;
+      }
+      await apiRequest("/api/auth/password/reset", {
+        token: passwordResetToken,
+        password: pw,
+      });
+      passwordResetToken = "";
+      openAuth("login");
+      $("anote").textContent = "Password updated. Log in with your new password.";
+      return;
+    }
     if (amode === "signup") {
       var registration = await apiRequest("/api/register", {
         name: $("an").value.trim(),
