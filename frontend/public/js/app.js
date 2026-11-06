@@ -449,12 +449,9 @@ function render() {
   var q = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   var list = C.filter(function (c) {
     var s = [c.n, c.cat, c.f, c.tr, c.s + " seats"].join(" ").toLowerCase();
-    return (
-      (!c.status || String(c.status).trim().toLowerCase() === "available") &&
-      q.every(function (w) {
-        return s.indexOf(w) > -1;
-      })
-    );
+    return q.every(function (w) {
+      return s.indexOf(w) > -1;
+    });
   });
   var key = query;
   if (key !== rkey) {
@@ -465,10 +462,26 @@ function render() {
     list
       .slice(0, shown)
       .map(function (c) {
+        var status = String(c.status || "Available").trim() || "Available";
+        var statusKey = status.toLowerCase();
+        var statusLabel = statusKey === "rented" ? "In use" : status;
+        var statusClass =
+          statusKey === "available"
+            ? "available"
+            : statusKey === "booked"
+              ? "booked"
+              : statusKey === "rented"
+                ? "in-use"
+                : "unavailable";
+        var canBook = statusKey === "available";
         return (
           '<article class="card"><div class="img">' +
           art(c) +
-          '</div><div class="body"><h3>' +
+          '</div><div class="body"><span class="car-status car-status-' +
+          statusClass +
+          '">' +
+          esc(statusLabel) +
+          '</span><h3>' +
           c.n +
           '</h3><p class="specs">' +
           c.s +
@@ -480,7 +493,11 @@ function render() {
           fmt(c.p) +
           '<small>per day</small></div><button class="btn" data-id="' +
           c.id +
-          '">Book</button></div></div></article>'
+          '"' +
+          (canBook ? "" : " disabled") +
+          ">" +
+          (canBook ? "Book" : esc(statusLabel)) +
+          "</button></div></div></article>"
         );
       })
       .join("") || '<p class="nores">No cars match your search.</p>';
@@ -521,6 +538,14 @@ function openCarBooking(id) {
     return item.id === Number(id);
   });
   if (!car) return;
+  if (String(car.status || "Available").trim().toLowerCase() !== "available") {
+    var status =
+      String(car.status || "unavailable").trim().toLowerCase() === "rented"
+        ? "in use"
+        : String(car.status || "unavailable").trim().toLowerCase();
+    toast("This car is currently " + status + ".");
+    return;
+  }
   if (!(ME && USERS[ME])) {
     pendingBookingCarId = car.id;
     openAuth("signup");
@@ -1598,6 +1623,11 @@ async function updateCarStatus(carId, newStatus) {
   });
   if (remIdx > -1) REMOTE_CARS[remIdx].status = newStatus;
   else REMOTE_CARS.push(carPayload);
+  var catalogCar = C.find(function (c) {
+    return c.id === Number(carId);
+  });
+  if (catalogCar) catalogCar.status = newStatus;
+  render();
   adRender();
 }
 
@@ -2011,9 +2041,11 @@ function adRender() {
             var stBadge =
               st === "Available"
                 ? "adbadge-available"
-                : st === "Rented"
-                  ? "adbadge-rented"
-                  : "adbadge-maintenance";
+                : st === "Booked"
+                  ? "adbadge-booked"
+                  : st === "Rented"
+                    ? "adbadge-rented"
+                    : "adbadge-maintenance";
             return (
               '<div class="adcar-card">' +
               '<img src="' +
@@ -2055,7 +2087,7 @@ function adRender() {
               '<select class="status-sel" data-carst="' +
               c.id +
               '" style="flex:1;">' +
-              ["Available", "Rented", "Maintenance"]
+              ["Available", "Booked", "Rented", "Maintenance"]
                 .map(function (s) {
                   return (
                     "<option" +

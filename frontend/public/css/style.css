@@ -280,6 +280,35 @@ select {
   gap: 4px;
   flex: 1;
 }
+.car-status {
+  align-self: flex-start;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.car-status-available {
+  background: #dcfce7;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+.car-status-booked {
+  background: #e0f2fe;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+.car-status-in-use {
+  background: #ffedd5;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+.car-status-unavailable {
+  background: #f3e8ff;
+  border-color: #e9d5ff;
+  color: #7e22ce;
+}
 .card h3 {
   font-size: 21px;
 }
