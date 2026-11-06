@@ -2275,6 +2275,27 @@ function adRender() {
         ]);
       }),
     );
+  } else if (atab === "access") {
+    out =
+      '<p class="fleet-intro">Grant admin access to registered accounts. Admins sign in with their existing account credentials.</p>' +
+      tbl(
+        ["Name", "Phone / Email", "Role", "Action"],
+        REMOTE_USERS.map(function (user) {
+          var isAdmin = user.role === "admin";
+          return tr([
+            "<b>" + esc(user.name || "Account") + "</b>",
+            esc(user.email || user.phone || "—"),
+            '<span class="adbadge">' + (isAdmin ? "Admin" : "Customer") + "</span>",
+            '<button class="btn ghost small" data-userrole="' +
+              esc(user.id) +
+              '" data-role="' +
+              (isAdmin ? "customer" : "admin") +
+              '" type="button">' +
+              (isAdmin ? "Remove admin" : "Make admin") +
+              "</button>",
+          ]);
+        }),
+      );
   } else if (atab === "chats") {
     var chatsOut = chatTable(ok);
     var messagesOut = "";
@@ -2628,6 +2649,39 @@ function handleAdminLogout() {
   );
 }
 
+async function changeUserRole(identifier, role) {
+  var user = REMOTE_USERS.find(function (item) {
+    return item.id === identifier;
+  });
+  if (!user) return;
+  var action =
+    role === "admin"
+      ? "grant admin access to "
+      : "remove admin access from ";
+  if (
+    !confirm(
+      "Are you sure you want to " +
+        action +
+        (user.name || user.email || identifier) +
+        "?",
+    )
+  )
+    return;
+  try {
+    await apiRequest(
+      "/api/admin/users/role",
+      { id: identifier, role: role },
+      "PATCH",
+    );
+    await openAdmin();
+    atab = "access";
+    adRender();
+    toast(role === "admin" ? "Admin access granted." : "Admin access removed.");
+  } catch (error) {
+    toast("Could not change account role: " + error.message);
+  }
+}
+
 document.addEventListener("click", async function (e) {
   var c = e.target.closest("[data-cancel]");
   if (c) {
@@ -2950,6 +3004,8 @@ document.addEventListener("click", async function (e) {
     }
   } else if (o.id === "wcar-delete") {
     await deleteCar(Number($("wcar-id").value));
+  } else if (o.dataset.userrole) {
+    await changeUserRole(o.dataset.userrole, o.dataset.role);
   } else if (o.dataset.filtercust) {
     atab = "bookings";
     if ($("adq")) $("adq").value = o.dataset.filtercust;
