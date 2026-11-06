@@ -1861,6 +1861,18 @@ function tr(c) {
   );
 }
 
+function activityActionLabel(action) {
+  var message = String(action || "");
+  if (/^Car removed from fleet:\s*/i.test(message)) {
+    return message.replace(/^Car removed from fleet:\s*/i, "Car removed by admin: ");
+  }
+  var removedByPerson = message.match(/^Car\s+(.+?)\s+removed by\s+.+$/i);
+  if (removedByPerson) {
+    return "Car removed by admin: " + removedByPerson[1];
+  }
+  return message;
+}
+
 function adRender() {
   C = filterRemovedCars(C);
   var q = ($("adq") ? $("adq").value : "").trim().toLowerCase();
@@ -2357,7 +2369,7 @@ function adRender() {
             })[0] || {};
           return tr([
             dt(event.ts),
-            "<b>" + esc(event.action) + "</b>",
+            "<b>" + esc(activityActionLabel(event.action)) + "</b>",
             esc(user.name || (event.phone ? "Customer" : "Administrator")),
             esc(user.email || event.phone || "—"),
           ]);
